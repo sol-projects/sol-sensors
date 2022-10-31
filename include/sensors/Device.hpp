@@ -1,15 +1,16 @@
 #pragma once
 #include <string>
 
-namespace sensors{
-struct Device
+namespace sensors
 {
-    enum class Type
+    struct Device
     {
-        CPU, GPU
-    };
+        enum class Type
+        {
+            CPU, GPU
+        };
 
-    std::string name;
-    Type type;
-};
+        std::string name;
+        Type type;
+    };
 }
