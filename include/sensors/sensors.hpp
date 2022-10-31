@@ -4,5 +4,5 @@
 
 namespace sensors
 {
-    std::vector<Device> getDevices(Device::Type)
+    std::vector<Device> getDevices(Device::Type type);
 }

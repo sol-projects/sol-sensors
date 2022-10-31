@@ -9,6 +9,8 @@ enable_testing()
 
 add_executable(${PROJECT_NAME}
     main.cpp
+    src/sensors/win_sensors.cpp
+    src/sensors/unix_sensors.cpp
 )
 
 add_executable(Tests tests/tests.cpp)

@@ -12,5 +12,7 @@ namespace sensors
 
         std::string name;
         Type type;
+        int temperature;
+        int load;
     };
 }
