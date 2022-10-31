@@ -5,9 +5,15 @@ project(RPO_projekt
         LANGUAGES CXX
 )
 
+enable_testing()
+
 add_executable(${PROJECT_NAME}
     main.cpp
 )
+
+add_executable(Tests tests/tests.cpp)
+add_test(NAME Tests COMMAND Tests)
+
 
 find_package(Qt5 COMPONENTS Core REQUIRED)
 
@@ -33,9 +39,11 @@ set_target_properties(${PROJECT_NAME} PROPERTIES CXX_EXTENSIONS OFF)
 
 if(UNIX)
     target_link_libraries(${PROJECT_NAME} PUBLIC sensors)
+    target_link_libraries(Tests PUBLIC sensors)
 endif(UNIX)
 
 target_link_libraries(${PROJECT_NAME} PUBLIC Qt::Core)
+target_link_libraries(Tests PUBLIC Qt::Core)
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR "clang")
     target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Wpedantic -O2)
