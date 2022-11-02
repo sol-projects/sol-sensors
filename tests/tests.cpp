@@ -8,6 +8,7 @@ int main()
 
     assert(!devices.empty());
 
+    llog::Print("Number of devices:", std::size(devices));
     llog::Print(devices);
 
     return 0;
