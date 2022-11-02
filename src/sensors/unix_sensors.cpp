@@ -20,6 +20,7 @@ namespace
         if(!file)
         {
             llog::Print(llog::pt::error, "Cannot open ", cpuinfo);
+            return {};
         }
 
         std::vector<sensors::Device> cpus;
@@ -31,7 +32,7 @@ namespace
             if(const std::string nameStart = "model name	: "; line.starts_with(nameStart))
             {
                 cpuCount++;
-                cpus.push_back({line.substr(std::size(nameStart)), sensors::Device::Type::CPU, -1, -1});
+                cpus.push_back({line.substr(std::size(nameStart)), sensors::Device::Type::CPU, 0, 0});
                 break; //temporary until "more cpu cores" / "more cpus" option added
             }
         }
@@ -54,7 +55,7 @@ namespace
                 {
                     if(std::string nameStart = "Model:"; line.starts_with(nameStart))
                     {
-                        gpus.push_back({line.substr(std::size(nameStart)), sensors::Device::Type::GPU, -1, -1});
+                        gpus.push_back({line.substr(std::size(nameStart)), sensors::Device::Type::GPU, 0, 0});
 
                     }
                 }
@@ -62,6 +63,42 @@ namespace
         }
         return gpus;
 
+    }
+    
+    sensors::Device RAMinfo()
+    {
+
+        const std::filesystem::path raminfo = "/proc/meminfo";
+        std::ifstream file(raminfo);
+
+        sensors::Device ram {
+            .name = {},
+            .type = sensors::Device::Type::RAM,
+            .temperature = 0,
+            .load = 0
+        };
+
+        if(!file)
+        {
+            llog::Print(llog::pt::error, "Cannot open ", raminfo);
+            return {};
+        }
+
+        std::string line;
+        while(std::getline(file, line))
+        {
+            if(const std::string nameStart = "MemTotal:"; line.starts_with(nameStart))
+            {
+                auto totalram = line.substr(std::size(nameStart));
+                std::erase(totalram, ' ');
+                totalram.pop_back();
+                totalram.pop_back();
+                
+                return sensors::Device{std::to_string(static_cast<int>(std::stoi(totalram)*0.000001)) + " GB", sensors::Device::Type::RAM, 0, 0};
+            }
+        }
+
+        return {};
     }
 }
 
@@ -82,6 +119,11 @@ namespace sensors
             devices.insert(std::end(devices), std::begin(gpuInfo), std::end(gpuInfo));
         }
 
+        if(type == Device::Type::RAM || type == Device::Type::Any)
+        {
+            auto ramInfo = RAMinfo();
+            devices.push_back(ramInfo);
+        }
         return devices;
     }
 }

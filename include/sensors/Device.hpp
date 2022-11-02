@@ -8,7 +8,7 @@ namespace sensors
     {
         enum class Type
         {
-            CPU, GPU, Any
+            CPU, GPU, RAM, Any
         };
 
         std::string name;
