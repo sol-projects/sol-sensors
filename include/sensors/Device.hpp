@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <iostream>
 
 namespace sensors
 {
@@ -7,7 +8,7 @@ namespace sensors
     {
         enum class Type
         {
-            CPU, GPU
+            CPU, GPU, Any
         };
 
         std::string name;
@@ -15,4 +16,11 @@ namespace sensors
         int temperature;
         int load;
     };
+
+    inline std::ostream& operator<<(std::ostream& os, const Device& device)
+    {
+        os << device.name << " " << device.temperature << " " << device.load;
+        return os;
+    }
+
 }
