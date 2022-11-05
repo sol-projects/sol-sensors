@@ -11,6 +11,13 @@ namespace sensors
             CPU, GPU, RAM, Any
         };
 
+        static int generateID()
+        {
+            static int i;
+            return i++;
+        }
+
+        int id;
         std::string name;
         Type type;
         int temperature;
@@ -19,7 +26,7 @@ namespace sensors
 
     inline std::ostream& operator<<(std::ostream& os, const Device& device)
     {
-        os << device.name << " " << device.temperature << " " << device.load;
+        os << device.id << " " << device.name << " " << device.temperature << " " << device.load;
         return os;
     }
 
