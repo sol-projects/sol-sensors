@@ -1,9 +1,13 @@
-# debug
+# Debug
 Debug/
 debug/
+build/
 
 # Libraries
 libraries/
+
+# Testing
+Testing/
 
 # Config
 compile_commands.json

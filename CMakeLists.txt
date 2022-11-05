@@ -10,12 +10,12 @@ enable_testing()
 add_executable(${PROJECT_NAME}
     main.cpp
     src/sensors/win_sensors.cpp
-    src/sensors/unix_sensors.cpp
+    src/sensors/linux_sensors.cpp
 )
 
 add_executable(Tests 
     tests/tests.cpp
-    src/sensors/unix_sensors.cpp
+    src/sensors/linux_sensors.cpp
     src/sensors/win_sensors.cpp
 )
 add_test(NAME Tests COMMAND Tests)
