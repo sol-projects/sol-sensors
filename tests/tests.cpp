@@ -12,17 +12,30 @@ int main()
             case sensors::Device::Type::CPU:
             {
                 llog::Print("Device name:", device.name);
-                llog::Print("Temperature:", sensors::getTemp(device));
-                llog::Print("Load: ", sensors::getLoad(device));
+                llog::Print("-Temperature:", sensors::getTemp(device));
+                llog::Print("-Load: ", sensors::getLoad(device));
                 break;
             }
 
             case sensors::Device::Type::RAM:
             {
                 llog::Print("Device name:", device.name);
-                llog::Print("Temperature:", sensors::getTemp(device));
-                llog::Print("Load:", sensors::getLoad(device));
+                llog::Print("-Temperature:", sensors::getTemp(device));
+                llog::Print("-Load:", sensors::getLoad(device));
                 break;
+            }
+
+            case sensors::Device::Type::GPU:
+            {
+                llog::Print("Device name:", device.name);
+                llog::Print("-Temperature:", sensors::getTemp(device));
+                llog::Print("-Load:", sensors::getLoad(device));
+                break;
+            }
+
+            case sensors::Device::Type::Any:
+            {
+                llog::Print(llog::pt::error, "Unknown device type", device.name);
             }
         }
     }
