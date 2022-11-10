@@ -4,15 +4,28 @@
 
 int main()
 {
-    auto devices = sensors::getDevices(sensors::Device::Type::Any);
 
-    assert(!devices.empty());
+    for(const auto& device : sensors::getDevices(sensors::Device::Type::Any))
+    {
+        switch(device.type)
+        {
+            case sensors::Device::Type::CPU:
+            {
+                llog::Print("Device name:", device.name);
+                llog::Print("Temperature:", sensors::getTemp(device));
+                llog::Print("Load: ", sensors::getLoad(device));
+                break;
+            }
 
-    llog::Print("Number of devices:", std::size(devices));
-    llog::Print(devices);
+            case sensors::Device::Type::RAM:
+            {
+                llog::Print("Device name:", device.name);
+                llog::Print("Temperature:", sensors::getTemp(device));
+                llog::Print("Load:", sensors::getLoad(device));
+                break;
+            }
+        }
+    }
 
-    llog::Print("CPU temperature:", sensors::getTemp(devices.at(0)));
-    llog::Print("GPU temperature:", sensors::getTemp(devices.at(1)));
-    llog::Print("RAM usage:", sensors::getLoad(devices.at(2)));
     return 0;
 }
