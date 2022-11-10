@@ -11,9 +11,8 @@ int main()
     llog::Print("Number of devices:", std::size(devices));
     llog::Print(devices);
 
-    assert(sensors::getTemp(devices.at(0)) != 0);
     llog::Print("CPU temperature:", sensors::getTemp(devices.at(0)));
-    assert(sensors::getTemp(devices.at(1)) != 0);
     llog::Print("GPU temperature:", sensors::getTemp(devices.at(1)));
+    llog::Print("RAM usage:", sensors::getLoad(devices.at(2)));
     return 0;
 }

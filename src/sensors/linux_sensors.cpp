@@ -10,8 +10,10 @@
 
 namespace
 {
+    const std::filesystem::path raminfo = "/proc/meminfo";
     const std::filesystem::path tempPath = "/sys/class/thermal";
     const std::filesystem::path nvidiaDir = "/proc/driver/nvidia/gpus/";
+
     enum class GPUType
     {
         Nvidia, Amd, Intel, Unknown
@@ -28,6 +30,41 @@ namespace
     }
 
     const auto gpuType = findGpuType();
+
+    int findNumCpuCores()
+    {
+        std::ifstream file("/proc/stat");
+
+        int numCores = 0;
+        if(file)
+        {
+            std::string line;
+            while(std::getline(file, line))
+            {
+                if(line.starts_with("cpu"))
+                {
+                    while(std::getline(file, line))
+                    {
+                        if(!line.starts_with("cpu"))
+                        {
+                            return numCores;
+                        }
+                        else
+                        {
+                            numCores++;
+                        }
+                    }
+                }
+            }
+        }
+        else
+        {
+            llog::Print(llog::pt::error, "Cannot open file at:", llog::Location());
+        }
+
+        llog::Print(llog::pt::error, "Cannot find number of CPU cores.");
+        return 0;
+    }
 
     std::string findCpuTempPath()
     {
@@ -77,12 +114,10 @@ namespace
         std::vector<sensors::Device> cpus;
 
         std::string line;
-        int cpuCount = 0;
         while (std::getline(file, line))
         {
             if (const std::string nameStart = "model name	: "; line.starts_with(nameStart))
             {
-                cpuCount++;
                 cpus.push_back({ sensors::Device::generateID(), line.substr(std::size(nameStart)), sensors::Device::Type::CPU, 0, 0 });
                 break; // temporary until "more cpu cores" / "more cpus" option added
             }
@@ -121,7 +156,6 @@ namespace
     sensors::Device RAMinfo()
     {
 
-        const std::filesystem::path raminfo = "/proc/meminfo";
         std::ifstream file(raminfo);
 
         sensors::Device ram {
@@ -188,6 +222,10 @@ namespace sensors
         {
             case Device::Type::CPU:
                 {
+                    static const int numCores = findNumCpuCores();
+                    std::ifstream("proc/stat");
+
+                    
                     break;
                 }
             case Device::Type::GPU:
@@ -196,7 +234,34 @@ namespace sensors
                 }
             case Device::Type::RAM:
                 {
-                    break;
+                    static std::ifstream ramFile(raminfo);
+                    auto getRam = [&](const std::string& name)
+                    {
+                        std::string line;
+                        while(std::getline(ramFile, line))
+                        {
+                            if (line.starts_with(name))
+                            {
+                                auto ramStr = line.substr(std::size(name));
+                                std::erase(ramStr, ' ');
+                                ramStr.pop_back();
+                                ramStr.pop_back();
+                                return std::stoi(ramStr);
+                            }
+                        }
+
+                        return 0;
+                    };
+
+                    if(!ramFile)
+                    {
+                        llog::Print(llog::pt::error, "Cannot load Memory usage from file:", raminfo);
+                    }
+                    
+                    static int totalRam = getRam("MemTotal:");
+                    int freeRam = getRam("MemAvailable:");
+
+                    return (totalRam - freeRam)*0.00001;
                 }
             case Device::Type::Any:
                 llog::Print(llog::pt::error, "Getting load from invalid device type with name:", device.name);
@@ -241,6 +306,7 @@ namespace sensors
                 }
             case Device::Type::RAM:
                 {
+                    break;
                 }
             case Device::Type::Any:
                 llog::Print(llog::pt::error, "Getting temperature from invalid device type with name:", device.name);
