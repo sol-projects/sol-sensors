@@ -12,6 +12,7 @@
 namespace
 {
     const std::filesystem::path raminfo = "/proc/meminfo";
+    const std::filesystem::path cpuUsageInfo = "/proc/stat";
     const std::filesystem::path tempPath = "/sys/class/thermal";
     const std::filesystem::path nvidiaDir = "/proc/driver/nvidia/gpus/";
 
@@ -224,11 +225,11 @@ namespace sensors
             case Device::Type::CPU:
                 {
                     static const int numCores = findNumCpuCores();
-                    std::ifstream file("/proc/stat");
+                    std::ifstream file(cpuUsageInfo);
 
                     if(!file)
                     {
-                        llog::Print(llog::pt::error, "Cannot open file /proc/stat");
+                        llog::Print(llog::pt::error, "Cannot open file", cpuUsageInfo);
                     }
 
                     static std::size_t prevIdle = 0;
@@ -259,11 +260,6 @@ namespace sensors
 
                     std::string cpuName;
                     file >> cpuName;
-                    static auto prevFuncCallTime = std::chrono::high_resolution_clock::now();
-                    static auto currFuncCallTime = std::chrono::high_resolution_clock::now();
-
-                    prevFuncCallTime = currFuncCallTime;
-                    currFuncCallTime = std::chrono::high_resolution_clock::now();
 
                     file >> user;
                     file >> nice;
@@ -298,7 +294,7 @@ namespace sensors
 
                     auto totaldiff = total - prevTotal;
                     auto idlediff = fullIdle - fullPrevIdle;
-                    return static_cast<int>(totaldiff - idlediff);
+                    return static_cast<int>((1000*static_cast<float>(totaldiff - idlediff) / totaldiff + 1));
                 }
             case Device::Type::GPU:
                 {
