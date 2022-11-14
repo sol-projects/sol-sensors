@@ -1,9 +1,12 @@
 #include "sensors/sensors.hpp"
 #include <cassert>
 #include <LLOG/llog.hpp>
+#include <chrono>
+#include <thread>
 
 int main()
 {
+    using namespace std::chrono_literals;
 
     for(const auto& device : sensors::getDevices(sensors::Device::Type::Any))
     {
@@ -13,6 +16,8 @@ int main()
             {
                 llog::Print("Device name:", device.name);
                 llog::Print("-Temperature:", sensors::getTemp(device));
+                sensors::getLoad(device);
+                std::this_thread::sleep_for(500ms);
                 llog::Print("-Load: ", sensors::getLoad(device));
                 break;
             }

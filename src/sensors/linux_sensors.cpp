@@ -7,6 +7,7 @@
 #include <filesystem>
 #include <fstream>
 #include <string>
+#include <chrono>
 
 namespace
 {
@@ -223,10 +224,81 @@ namespace sensors
             case Device::Type::CPU:
                 {
                     static const int numCores = findNumCpuCores();
-                    std::ifstream("proc/stat");
+                    std::ifstream file("/proc/stat");
 
-                    
-                    break;
+                    if(!file)
+                    {
+                        llog::Print(llog::pt::error, "Cannot open file /proc/stat");
+                    }
+
+                    static std::size_t prevIdle = 0;
+                    static std::size_t idle = 0;
+                    static std::size_t prevUser = 0;
+                    static std::size_t user = 0;
+                    static std::size_t prevNice = 0;
+                    static std::size_t nice = 0;
+                    static std::size_t prevSystem = 0;
+                    static std::size_t system = 0;
+                    static std::size_t prevIoWait = 0;
+                    static std::size_t ioWait = 0; 
+                    static std::size_t prevIrq = 0;
+                    static std::size_t irq = 0;
+                    static std::size_t prevSoftIrq = 0;
+                    static std::size_t softIrq = 0;
+                    static std::size_t prevSteal = 0;
+                    static std::size_t steal = 0;
+
+                    prevIdle = idle;
+                    prevUser = user;
+                    prevNice = nice;
+                    prevSystem = system;
+                    prevIoWait = ioWait;
+                    prevIrq = irq;
+                    prevSoftIrq = softIrq;
+                    prevSteal = steal;
+
+                    std::string cpuName;
+                    file >> cpuName;
+                    static auto prevFuncCallTime = std::chrono::high_resolution_clock::now();
+                    static auto currFuncCallTime = std::chrono::high_resolution_clock::now();
+
+                    prevFuncCallTime = currFuncCallTime;
+                    currFuncCallTime = std::chrono::high_resolution_clock::now();
+
+                    file >> user;
+                    file >> nice;
+                    file >> system;
+                    file >> idle;
+                    file >> ioWait;
+                    file >> irq;
+                    file >> softIrq;
+                    file >> steal;
+
+                    if(prevIdle == 0)
+                    {
+                        prevIdle = idle;
+                        prevUser = user;
+                        prevNice = nice;
+                        prevSystem = system;
+                        prevIoWait = ioWait;
+                        prevIrq = irq;
+                        prevSoftIrq = softIrq;
+                        prevSteal = steal;
+                        llog::Print(llog::pt::warning, "First function call to getLoad(CPU) on Linux is ignored");
+                        return 0;
+                    }
+
+                    auto fullPrevIdle = prevIdle + prevIoWait;
+                    auto fullIdle = idle + ioWait;
+
+                    auto prevNonIdle = prevUser + prevNice + prevSystem + prevIrq + prevSoftIrq + prevSteal;
+                    auto nonIdle = user + nice + system + irq + softIrq + steal;
+                    auto prevTotal = fullPrevIdle + prevNonIdle;
+                    auto total = fullIdle + nonIdle;
+
+                    auto totaldiff = total - prevTotal;
+                    auto idlediff = fullIdle - fullPrevIdle;
+                    return static_cast<int>(totaldiff - idlediff);
                 }
             case Device::Type::GPU:
                 {

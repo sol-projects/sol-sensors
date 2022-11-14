@@ -13,5 +13,15 @@ namespace sensors
     {
         return {};
     }
+
+    int getLoad(const Device& device)
+    {
+        return {};
+    }
+
+    int getTemp(const Device& device)
+    {
+        return {};
+    }
 }
 #endif
