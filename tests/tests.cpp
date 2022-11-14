@@ -8,7 +8,7 @@ int main()
 {
     using namespace std::chrono_literals;
 
-    for(const auto& device : sensors::getDevices(sensors::Device::Type::Any))
+    for(auto& device : sensors::getDevices(sensors::Device::Type::Any))
     {
         switch(device.type)
         {
@@ -18,7 +18,8 @@ int main()
                 llog::Print("-Temperature:", sensors::getTemp(device));
                 sensors::getLoad(device);
                 std::this_thread::sleep_for(500ms);
-                llog::Print("-Load: ", sensors::getLoad(device));
+                auto loadf = std::to_string(sensors::getLoad(device));
+                llog::Print("-Load: ", std::string(loadf.substr(0, loadf.size()-1) + "." + loadf.back() + "%"));
                 break;
             }
 
@@ -26,7 +27,8 @@ int main()
             {
                 llog::Print("Device name:", device.name);
                 llog::Print("-Temperature:", sensors::getTemp(device));
-                llog::Print("-Load:", sensors::getLoad(device));
+                auto loadf = std::to_string(sensors::getLoad(device));
+                llog::Print("-Load:", std::string(loadf.substr(0, loadf.size()-1) + "." + loadf.back() + " GB"));
                 break;
             }
 

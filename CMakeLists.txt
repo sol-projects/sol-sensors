@@ -21,7 +21,16 @@ add_executable(Tests
 add_test(NAME Tests COMMAND Tests)
 
 
-find_package(Qt5 COMPONENTS Core REQUIRED)
+find_package(Qt6 COMPONENTS Core)
+
+if(Qt6_FOUND)
+    message("-- Using Qt6")
+endif()
+
+if(NOT Qt6_FOUND)
+    find_package(Qt5 COMPONENTS Core REQUIRED)
+    message("-- Using Qt5")
+endif()
 
 if(CMAKE_BUILD_TYPE MATCHES Debug)
     message("-- DEBUG MODE")
