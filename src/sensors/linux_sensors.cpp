@@ -16,6 +16,18 @@ namespace
     const std::filesystem::path tempPath = "/sys/class/thermal";
     const std::filesystem::path nvidiaDir = "/proc/driver/nvidia/gpus/";
 
+    std::string nvidiasmiQuery(const std::string& query)
+    {
+        std::string fullQuery = "nvidia-smi --query-gpu=" + query + " --format=csv,noheader";
+        FILE* pFile = popen(fullQuery.c_str(), "r");
+
+        char buffer[256];
+        char* out = fgets(buffer, sizeof(buffer), pFile);
+
+        pclose(pFile);
+        return std::string(out);
+    }
+
     enum class GPUType
     {
         Nvidia, Amd, Intel, Unknown
@@ -152,6 +164,7 @@ namespace
         {
             //amd
         }
+
         return gpus;
     }
 
@@ -190,6 +203,18 @@ namespace
 
         return {};
     }
+
+    std::vector<sensors::Device> VRAMinfo()
+    {
+        std::vector<sensors::Device> vrams;
+        if(gpuType == GPUType::Nvidia)
+        {
+            vrams.push_back({ sensors::Device::generateID(), nvidiasmiQuery("name") + " " + nvidiasmiQuery("memory.total") + " VRAM", sensors::Device::Type::VRAM, 0, 0 });
+        }
+
+        return vrams;
+    }
+
 }
 
 namespace sensors
@@ -201,6 +226,11 @@ namespace sensors
         {
             auto cpuInfo = CPUinfo();
             devices.insert(std::end(devices), std::begin(cpuInfo), std::end(cpuInfo));
+            
+            if(!cpuInfo.empty())
+            {
+                getLoad(cpuInfo[0]);
+            }
         }
 
         if (type == Device::Type::GPU || type == Device::Type::Any)
@@ -213,6 +243,12 @@ namespace sensors
         {
             auto ramInfo = RAMinfo();
             devices.push_back(ramInfo);
+        }
+
+        if(type == Device::Type::VRAM || type == Device::Type::Any)
+        {
+            auto vramInfo = VRAMinfo();
+            devices.insert(std::end(devices), std::begin(vramInfo), std::end(vramInfo));
         }
 
         return devices;
@@ -280,7 +316,6 @@ namespace sensors
                         prevIrq = irq;
                         prevSoftIrq = softIrq;
                         prevSteal = steal;
-                        llog::Print(llog::pt::warning, "First function call to getLoad(CPU) on Linux is ignored");
                         return 0;
                     }
 
@@ -331,6 +366,16 @@ namespace sensors
 
                     return (totalRam - freeRam)*0.00001;
                 }
+            case Device::Type::VRAM:
+                {
+                    if(gpuType == GPUType::Nvidia)
+                    {
+                        auto memUsedStr = nvidiasmiQuery("memory.used");
+                        return std::stoi(memUsedStr.substr(0, std::size(memUsedStr) - 4))*0.01;
+                    }
+                    
+                    return 0;
+                }
             case Device::Type::Any:
                 llog::Print(llog::pt::error, "Getting load from invalid device type with name:", device.name);
         }
@@ -362,19 +407,28 @@ namespace sensors
                 {
                     if(gpuType == GPUType::Nvidia)
                     {
-                        FILE* pFile = popen("nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader", "r");
-
-                        char buffer[32];
-                        char* line_p = fgets(buffer, sizeof(buffer), pFile);
-
-                        pclose(pFile);
-                        return std::atoi(line_p);
+                        return std::stoi(nvidiasmiQuery("temperature.gpu"));
                     }
+
                     break;
                 }
             case Device::Type::RAM:
                 {
-                    break;
+                    return 0;
+                }
+            case Device::Type::VRAM:
+                {
+                    if(gpuType == GPUType::Nvidia)
+                    {
+                        if(auto memTemp = nvidiasmiQuery("temperature.memory"); memTemp != "N/A\n")
+                        {
+                            return std::stoi(memTemp);
+                        }
+                        
+                        return 0;
+                    }
+
+                    return 0;    
                 }
             case Device::Type::Any:
                 llog::Print(llog::pt::error, "Getting temperature from invalid device type with name:", device.name);

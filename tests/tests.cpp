@@ -16,8 +16,7 @@ int main()
             {
                 llog::Print("Device name:", device.name);
                 llog::Print("-Temperature:", sensors::getTemp(device));
-                sensors::getLoad(device);
-                std::this_thread::sleep_for(500ms);
+                std::this_thread::sleep_for(200ms);
                 auto loadf = std::to_string(sensors::getLoad(device));
                 llog::Print("-Load: ", std::string(loadf.substr(0, loadf.size()-1) + "." + loadf.back() + "%"));
                 break;
@@ -40,6 +39,14 @@ int main()
                 break;
             }
 
+            case sensors::Device::Type::VRAM:
+            {
+                llog::Print("Device name:", device.name);
+                llog::Print("-Temperature:", sensors::getTemp(device));
+                auto loadf = std::to_string(sensors::getLoad(device));
+                llog::Print("-Load:", std::string(loadf.substr(0, loadf.size()-1) + "." + loadf.back() + " GB"));
+                break;
+            }
             case sensors::Device::Type::Any:
             {
                 llog::Print(llog::pt::error, "Unknown device type", device.name);
