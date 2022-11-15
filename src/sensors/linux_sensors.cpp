@@ -4,10 +4,10 @@
 #ifdef __linux__
 
 #include <LLOG/llog.hpp>
+#include <chrono>
 #include <filesystem>
 #include <fstream>
 #include <string>
-#include <chrono>
 
 namespace
 {
@@ -30,7 +30,10 @@ namespace
 
     enum class GPUType
     {
-        Nvidia, Amd, Intel, Unknown
+        Nvidia,
+        Amd,
+        Intel,
+        Unknown
     };
 
     GPUType findGpuType()
@@ -50,16 +53,16 @@ namespace
         std::ifstream file("/proc/stat");
 
         int numCores = 0;
-        if(file)
+        if (file)
         {
             std::string line;
-            while(std::getline(file, line))
+            while (std::getline(file, line))
             {
-                if(line.starts_with("cpu"))
+                if (line.starts_with("cpu"))
                 {
-                    while(std::getline(file, line))
+                    while (std::getline(file, line))
                     {
-                        if(!line.starts_with("cpu"))
+                        if (!line.starts_with("cpu"))
                         {
                             return numCores;
                         }
@@ -162,7 +165,7 @@ namespace
         }
         else
         {
-            //amd
+            // amd
         }
 
         return gpus;
@@ -207,7 +210,7 @@ namespace
     std::vector<sensors::Device> VRAMinfo()
     {
         std::vector<sensors::Device> vrams;
-        if(gpuType == GPUType::Nvidia)
+        if (gpuType == GPUType::Nvidia)
         {
             vrams.push_back({ sensors::Device::generateID(), nvidiasmiQuery("name") + " " + nvidiasmiQuery("memory.total") + " VRAM", sensors::Device::Type::VRAM, 0, 0 });
         }
@@ -226,8 +229,8 @@ namespace sensors
         {
             auto cpuInfo = CPUinfo();
             devices.insert(std::end(devices), std::begin(cpuInfo), std::end(cpuInfo));
-            
-            if(!cpuInfo.empty())
+
+            if (!cpuInfo.empty())
             {
                 getLoad(cpuInfo[0]);
             }
@@ -245,7 +248,7 @@ namespace sensors
             devices.push_back(ramInfo);
         }
 
-        if(type == Device::Type::VRAM || type == Device::Type::Any)
+        if (type == Device::Type::VRAM || type == Device::Type::Any)
         {
             auto vramInfo = VRAMinfo();
             devices.insert(std::end(devices), std::begin(vramInfo), std::end(vramInfo));
@@ -263,7 +266,7 @@ namespace sensors
                     static const int numCores = findNumCpuCores();
                     std::ifstream file(cpuUsageInfo);
 
-                    if(!file)
+                    if (!file)
                     {
                         llog::Print(llog::pt::error, "Cannot open file", cpuUsageInfo);
                     }
@@ -277,7 +280,7 @@ namespace sensors
                     static std::size_t prevSystem = 0;
                     static std::size_t system = 0;
                     static std::size_t prevIoWait = 0;
-                    static std::size_t ioWait = 0; 
+                    static std::size_t ioWait = 0;
                     static std::size_t prevIrq = 0;
                     static std::size_t irq = 0;
                     static std::size_t prevSoftIrq = 0;
@@ -306,7 +309,7 @@ namespace sensors
                     file >> softIrq;
                     file >> steal;
 
-                    if(prevIdle == 0)
+                    if (prevIdle == 0)
                     {
                         prevIdle = idle;
                         prevUser = user;
@@ -329,7 +332,7 @@ namespace sensors
 
                     auto totaldiff = total - prevTotal;
                     auto idlediff = fullIdle - fullPrevIdle;
-                    return static_cast<int>((1000*static_cast<float>(totaldiff - idlediff) / totaldiff + 1));
+                    return static_cast<int>((1000 * static_cast<float>(totaldiff - idlediff) / totaldiff + 1));
                 }
             case Device::Type::GPU:
                 {
@@ -338,10 +341,9 @@ namespace sensors
             case Device::Type::RAM:
                 {
                     static std::ifstream ramFile(raminfo);
-                    auto getRam = [&](const std::string& name)
-                    {
+                    auto getRam = [&](const std::string& name) {
                         std::string line;
-                        while(std::getline(ramFile, line))
+                        while (std::getline(ramFile, line))
                         {
                             if (line.starts_with(name))
                             {
@@ -356,24 +358,24 @@ namespace sensors
                         return 0;
                     };
 
-                    if(!ramFile)
+                    if (!ramFile)
                     {
                         llog::Print(llog::pt::error, "Cannot load Memory usage from file:", raminfo);
                     }
-                    
+
                     static int totalRam = getRam("MemTotal:");
                     int freeRam = getRam("MemAvailable:");
 
-                    return (totalRam - freeRam)*0.00001;
+                    return (totalRam - freeRam) * 0.00001;
                 }
             case Device::Type::VRAM:
                 {
-                    if(gpuType == GPUType::Nvidia)
+                    if (gpuType == GPUType::Nvidia)
                     {
                         auto memUsedStr = nvidiasmiQuery("memory.used");
-                        return std::stoi(memUsedStr.substr(0, std::size(memUsedStr) - 4))*0.01;
+                        return std::stoi(memUsedStr.substr(0, std::size(memUsedStr) - 4)) * 0.01;
                     }
-                    
+
                     return 0;
                 }
             case Device::Type::Any:
@@ -405,7 +407,7 @@ namespace sensors
                 }
             case Device::Type::GPU:
                 {
-                    if(gpuType == GPUType::Nvidia)
+                    if (gpuType == GPUType::Nvidia)
                     {
                         return std::stoi(nvidiasmiQuery("temperature.gpu"));
                     }
@@ -418,17 +420,17 @@ namespace sensors
                 }
             case Device::Type::VRAM:
                 {
-                    if(gpuType == GPUType::Nvidia)
+                    if (gpuType == GPUType::Nvidia)
                     {
-                        if(auto memTemp = nvidiasmiQuery("temperature.memory"); memTemp != "N/A\n")
+                        if (auto memTemp = nvidiasmiQuery("temperature.memory"); memTemp != "N/A\n")
                         {
                             return std::stoi(memTemp);
                         }
-                        
+
                         return 0;
                     }
 
-                    return 0;    
+                    return 0;
                 }
             case Device::Type::Any:
                 llog::Print(llog::pt::error, "Getting temperature from invalid device type with name:", device.name);

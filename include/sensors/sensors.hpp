@@ -1,6 +1,6 @@
 #pragma once
-#include <vector>
 #include "Device.hpp"
+#include <vector>
 
 namespace sensors
 {
@@ -29,4 +29,3 @@ namespace sensors
     */
     int getTemp(const Device& device);
 }
-

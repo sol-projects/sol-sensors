@@ -4,7 +4,7 @@
 
 namespace
 {
-    //declare variables you can use in this file
+    // declare variables you can use in this file
 }
 
 namespace sensors
