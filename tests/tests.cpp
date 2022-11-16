@@ -35,7 +35,7 @@ int main()
             {
                 llog::Print("Device name:", device.name);
                 llog::Print("-Temperature:", sensors::getTemp(device));
-                llog::Print("-Load:", sensors::getLoad(device));
+                llog::Print("-Load:", std::to_string(sensors::getLoad(device)) + "%");
                 break;
             }
 

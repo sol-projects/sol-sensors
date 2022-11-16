@@ -8,6 +8,7 @@
 #include <filesystem>
 #include <fstream>
 #include <string>
+#include <cstring>
 
 namespace
 {
@@ -25,7 +26,7 @@ namespace
         char* out = fgets(buffer, sizeof(buffer), pFile);
 
         pclose(pFile);
-        return std::string(out);
+        return std::string(out, out + std::strlen(out) - 1);
     }
 
     enum class GPUType
@@ -158,7 +159,13 @@ namespace
                 {
                     if (std::string nameStart = "Model:"; line.starts_with(nameStart))
                     {
-                        gpus.push_back({ sensors::Device::generateID(), line.substr(std::size(nameStart)), sensors::Device::Type::GPU, 0, 0 });
+                        auto name = line.substr(std::size(nameStart));
+                        while(name[0] == ' ' || name[0] == 9/*TAB*/)
+                        {
+                            name.erase(0, 1);
+                        }
+
+                        gpus.push_back({ sensors::Device::generateID(), name, sensors::Device::Type::GPU, 0, 0 });
                     }
                 }
             }
@@ -200,7 +207,7 @@ namespace
                 totalram.pop_back();
                 totalram.pop_back();
 
-                return sensors::Device { sensors::Device::generateID(), std::to_string(static_cast<int>(std::stoi(totalram) * 0.000001)) + " GB", sensors::Device::Type::RAM, 0, 0 };
+                return sensors::Device { sensors::Device::generateID(), std::to_string(static_cast<int>(std::stoi(totalram) * 0.000001)) + " GB RAM", sensors::Device::Type::RAM, 0, 0 };
             }
         }
 
@@ -336,7 +343,12 @@ namespace sensors
                 }
             case Device::Type::GPU:
                 {
-                    break;
+                    if(gpuType == GPUType::Nvidia)
+                    {
+                        return std::stoi(nvidiasmiQuery("utilization.gpu"));
+                    }
+
+                    return 0;
                 }
             case Device::Type::RAM:
                 {
@@ -422,7 +434,7 @@ namespace sensors
                 {
                     if (gpuType == GPUType::Nvidia)
                     {
-                        if (auto memTemp = nvidiasmiQuery("temperature.memory"); memTemp != "N/A\n")
+                        if (auto memTemp = nvidiasmiQuery("temperature.memory"); memTemp != "N/A")
                         {
                             return std::stoi(memTemp);
                         }
