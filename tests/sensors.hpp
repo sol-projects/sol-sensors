@@ -1,10 +1,12 @@
+#pragma once
 #include "sensors/sensors.hpp"
 #include <cassert>
 #include <LLOG/llog.hpp>
 #include <chrono>
 #include <thread>
+#include <DOCTEST/doctest.h>
 
-int main()
+TEST_CASE("Printing current temperature/usage information")
 {
     using namespace std::chrono_literals;
 
@@ -53,6 +55,4 @@ int main()
             }
         }
     }
-
-    return 0;
 }
