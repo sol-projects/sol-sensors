@@ -5,10 +5,10 @@
 
 #include <LLOG/llog.hpp>
 #include <chrono>
+#include <cstring>
 #include <filesystem>
 #include <fstream>
 #include <string>
-#include <cstring>
 
 namespace
 {
@@ -160,7 +160,7 @@ namespace
                     if (std::string nameStart = "Model:"; line.starts_with(nameStart))
                     {
                         auto name = line.substr(std::size(nameStart));
-                        while(name[0] == ' ' || name[0] == 9/*TAB*/)
+                        while (name[0] == ' ' || name[0] == 9 /*TAB*/)
                         {
                             name.erase(0, 1);
                         }
@@ -343,7 +343,7 @@ namespace sensors
                 }
             case Device::Type::GPU:
                 {
-                    if(gpuType == GPUType::Nvidia)
+                    if (gpuType == GPUType::Nvidia)
                     {
                         return std::stoi(nvidiasmiQuery("utilization.gpu"));
                     }

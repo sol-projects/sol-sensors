@@ -1,7 +1,7 @@
 #pragma once
-#include <shared/config/config.hpp>
 #include <DOCTEST/doctest.h>
 #include <filesystem>
+#include <shared/config/config.hpp>
 
 TEST_CASE("Creating and testing default config.")
 {
@@ -11,7 +11,7 @@ TEST_CASE("Creating and testing default config.")
     {
         CHECK(config::get("cpu_linux_temperature_measurement_mode").name == "cpu_linux_temperature_measurement_mode");
     }
-    
+
     SUBCASE("Testing setting and getting option values.")
     {
         auto option = config::get("cpu_linux_temperature_measurement_mode");
@@ -23,11 +23,9 @@ TEST_CASE("Creating and testing default config.")
         CHECK(option.value == "acpitz");
     }
 
-    SUBCASE("Testing if the config file is generated correctly.")
+    SUBCASE("Testing if the config file is generated from memory correctly.")
     {
-        CHECK(!config::saved());
         config::save();
         CHECK(config::saved());
     }
 }
-
