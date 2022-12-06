@@ -7,3 +7,4 @@ clang-format -i --files=./clang-format tests/config.hpp
 clang-format -i --files=./clang-format tests/sensors.hpp
 clang-format -i --files=./clang-format shared/include/shared/config/config.hpp
 clang-format -i --files=./clang-format shared/src/shared/config/config.cpp
+clang-format -i --files=./clang-format main.cpp

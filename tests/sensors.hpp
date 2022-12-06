@@ -10,49 +10,138 @@ TEST_CASE("Printing current temperature/usage information")
 {
     using namespace std::chrono_literals;
 
-    for (auto& device : sensors::getDevices(sensors::Device::Type::Any))
+    std::vector<sensors::Device> devices;
+
+    SUBCASE("Gathering info from all devices.")
     {
-        switch (device.type)
+        devices = sensors::getDevices(sensors::Device::Type::Any);
+        CHECK(!devices.empty());
+    }
+
+    //SUBCASE("Checking temperature and load.")
+    {
+        for (auto& device : devices)
         {
-            case sensors::Device::Type::CPU:
-                {
-                    llog::Print("Device name:", device.name);
-                    llog::Print("-Temperature:", sensors::getTemp(device));
-                    std::this_thread::sleep_for(200ms);
-                    auto loadf = std::to_string(sensors::getLoad(device));
-                    llog::Print("-Load: ", std::string(loadf.substr(0, loadf.size() - 1) + "." + loadf.back() + "%"));
-                    break;
-                }
+            switch (device.type)
+            {
+                case sensors::Device::Type::CPU:
+                    {
+                        CHECK(!device.name.empty());
+                        llog::Print("Testing CPU:", device.name);
+                        
+                        auto temp = sensors::getTemp(device);
+                        if(temp == 0)
+                        {
+                            llog::Print(llog::pt::warning, "Temperature not supported."); 
+                        }
+                        else
+                        {
+                            llog::Print("Temperature:", temp);
+                        }
 
-            case sensors::Device::Type::RAM:
-                {
-                    llog::Print("Device name:", device.name);
-                    llog::Print("-Temperature:", sensors::getTemp(device));
-                    auto loadf = std::to_string(sensors::getLoad(device));
-                    llog::Print("-Load:", std::string(loadf.substr(0, loadf.size() - 1) + "." + loadf.back() + " GB"));
+                        std::this_thread::sleep_for(200ms);
+                        auto load = sensors::getLoad(device);
+                        if(load == 0)
+                        {
+                            llog::Print(llog::pt::warning, "Load not supported."); 
+                        }
+                        else
+                        {
+                            auto loadf = std::to_string(load);
+                            llog::Print("Load: ", std::string(loadf.substr(0, loadf.size() - 1) + "." + loadf.back() + "%"));
+                        }
+                    }
                     break;
-                }
 
-            case sensors::Device::Type::GPU:
-                {
-                    llog::Print("Device name:", device.name);
-                    llog::Print("-Temperature:", sensors::getTemp(device));
-                    llog::Print("-Load:", std::to_string(sensors::getLoad(device)) + "%");
-                    break;
-                }
+                case sensors::Device::Type::RAM:
+                    {
+                        CHECK(!device.name.empty());
+                        llog::Print("Testing RAM:", device.name);
 
-            case sensors::Device::Type::VRAM:
-                {
-                    llog::Print("Device name:", device.name);
-                    llog::Print("-Temperature:", sensors::getTemp(device));
-                    auto loadf = std::to_string(sensors::getLoad(device));
-                    llog::Print("-Load:", std::string(loadf.substr(0, loadf.size() - 1) + "." + loadf.back() + " GB"));
+                        auto temp = sensors::getTemp(device);
+                        if(temp == 0)
+                        {
+                            llog::Print(llog::pt::warning, "Temperature not supported."); 
+                        }
+                        else
+                        {
+                            llog::Print("Temperature:", temp);
+                        }
+
+                        auto load = sensors::getLoad(device);
+                        if(load == 0)
+                        {
+                            llog::Print(llog::pt::warning, "Load not supported."); 
+                        }
+                        else
+                        {
+                            auto loadf = std::to_string(load);
+                            llog::Print("Load:", std::string(loadf.substr(0, loadf.size() - 1) + "." + loadf.back() + " GB"));
+                        }
+                    }
                     break;
-                }
-            case sensors::Device::Type::Any:
-                {
-                    llog::Print(llog::pt::error, "Unknown device type", device.name);
-                }
+
+                case sensors::Device::Type::GPU:
+                    { 
+                        CHECK(!device.name.empty());
+                        llog::Print("Testing GPU:", device.name);
+                        
+                        auto temp = sensors::getTemp(device);
+                        if(temp == 0)
+                        {
+                            llog::Print(llog::pt::warning, "Temperature not supported.");
+                        }
+                        else
+                        {
+                            llog::Print("Temperature:", temp);
+                        }
+
+                        auto load = sensors::getLoad(device);
+                        if(load == 0)
+                        {
+                            llog::Print(llog::pt::warning, "Load not supported.");
+                        }
+                        else
+                        {
+                            auto loadf = std::to_string(sensors::getLoad(device));
+                            llog::Print("Load:", std::to_string(sensors::getLoad(device)) + "%");
+                        }
+                    }
+                    break;
+
+                case sensors::Device::Type::VRAM:
+                    {
+                        CHECK(!device.name.empty());
+                        llog::Print("Testing VRAM:", device.name);
+
+                        auto temp = sensors::getTemp(device);
+                        if(temp == 0)
+                        {
+                            llog::Print(llog::pt::warning, "Temperature not supported.");
+                        }
+                        else
+                        {
+                            llog::Print("Temperature:", temp);
+                        }   
+
+                        auto load = sensors::getLoad(device);
+                        if(load == 0)
+                        {
+                            llog::Print(llog::pt::warning, "Load not supported.");
+                        }
+                        else
+                        {
+                            auto loadf = std::to_string(load);
+                            llog::Print("Load:", std::string(loadf.substr(0, loadf.size() - 1) + "." + loadf.back() + " GB"));
+                        }
+                    }
+                    break;
+                case sensors::Device::Type::Any:
+                    {
+                        REQUIRE(0);
+                        llog::Print(llog::pt::error, "Unknown device type", device.name);
+                    }
+            }
         }
     }
 }
