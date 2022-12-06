@@ -18,7 +18,7 @@ TEST_CASE("Printing current temperature/usage information")
         CHECK(!devices.empty());
     }
 
-    //SUBCASE("Checking temperature and load.")
+    // SUBCASE("Checking temperature and load.")
     {
         for (auto& device : devices)
         {
@@ -28,11 +28,11 @@ TEST_CASE("Printing current temperature/usage information")
                     {
                         CHECK(!device.name.empty());
                         llog::Print("Testing CPU:", device.name);
-                        
+
                         auto temp = sensors::getTemp(device);
-                        if(temp == 0)
+                        if (temp == 0)
                         {
-                            llog::Print(llog::pt::warning, "Temperature not supported."); 
+                            llog::Print(llog::pt::warning, "Temperature not supported.");
                         }
                         else
                         {
@@ -41,9 +41,9 @@ TEST_CASE("Printing current temperature/usage information")
 
                         std::this_thread::sleep_for(200ms);
                         auto load = sensors::getLoad(device);
-                        if(load == 0)
+                        if (load == 0)
                         {
-                            llog::Print(llog::pt::warning, "Load not supported."); 
+                            llog::Print(llog::pt::warning, "Load not supported.");
                         }
                         else
                         {
@@ -59,9 +59,9 @@ TEST_CASE("Printing current temperature/usage information")
                         llog::Print("Testing RAM:", device.name);
 
                         auto temp = sensors::getTemp(device);
-                        if(temp == 0)
+                        if (temp == 0)
                         {
-                            llog::Print(llog::pt::warning, "Temperature not supported."); 
+                            llog::Print(llog::pt::warning, "Temperature not supported.");
                         }
                         else
                         {
@@ -69,9 +69,9 @@ TEST_CASE("Printing current temperature/usage information")
                         }
 
                         auto load = sensors::getLoad(device);
-                        if(load == 0)
+                        if (load == 0)
                         {
-                            llog::Print(llog::pt::warning, "Load not supported."); 
+                            llog::Print(llog::pt::warning, "Load not supported.");
                         }
                         else
                         {
@@ -82,12 +82,12 @@ TEST_CASE("Printing current temperature/usage information")
                     break;
 
                 case sensors::Device::Type::GPU:
-                    { 
+                    {
                         CHECK(!device.name.empty());
                         llog::Print("Testing GPU:", device.name);
-                        
+
                         auto temp = sensors::getTemp(device);
-                        if(temp == 0)
+                        if (temp == 0)
                         {
                             llog::Print(llog::pt::warning, "Temperature not supported.");
                         }
@@ -97,7 +97,7 @@ TEST_CASE("Printing current temperature/usage information")
                         }
 
                         auto load = sensors::getLoad(device);
-                        if(load == 0)
+                        if (load == 0)
                         {
                             llog::Print(llog::pt::warning, "Load not supported.");
                         }
@@ -115,17 +115,17 @@ TEST_CASE("Printing current temperature/usage information")
                         llog::Print("Testing VRAM:", device.name);
 
                         auto temp = sensors::getTemp(device);
-                        if(temp == 0)
+                        if (temp == 0)
                         {
                             llog::Print(llog::pt::warning, "Temperature not supported.");
                         }
                         else
                         {
                             llog::Print("Temperature:", temp);
-                        }   
+                        }
 
                         auto load = sensors::getLoad(device);
-                        if(load == 0)
+                        if (load == 0)
                         {
                             llog::Print(llog::pt::warning, "Load not supported.");
                         }
