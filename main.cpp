@@ -1,6 +1,7 @@
 #include "tests/config.hpp"
-#include "tests/sensors.hpp"
 #include "tests/csv.hpp"
+#include "tests/sensors.hpp"
+#include "tests/stats.hpp"
 #include <DOCTEST/doctest.h>
 
 int main()
