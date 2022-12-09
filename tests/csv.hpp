@@ -1,9 +1,9 @@
 #pragma once
+#include "LLOG/llog.hpp"
+#include "sensors/sensors.hpp"
+#include "shared/csv/csv.hpp"
 #include <DOCTEST/doctest.h>
 #include <filesystem>
-#include "shared/csv/csv.hpp"
-#include "sensors/sensors.hpp"
-#include "LLOG/llog.hpp"
 #include <thread>
 
 TEST_CASE("Testing saving and reading from a file.")
@@ -16,7 +16,7 @@ TEST_CASE("Testing saving and reading from a file.")
         csv::Csv cpuCsv(cpu, 100, csv::MeasurementType::Both);
         cpuCsv.removeFileOnDestruct();
 
-        for(int i = 0; i < 20; i++)
+        for (int i = 0; i < 20; i++)
         {
             std::this_thread::sleep_for(40ms);
             cpu.load = sensors::getLoad(cpu);

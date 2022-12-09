@@ -18,7 +18,6 @@ TEST_CASE("Printing current temperature/usage information")
         CHECK(!devices.empty());
     }
 
-
     // SUBCASE("Checking temperature and load.")
     {
         for (auto& device : devices)
@@ -98,7 +97,7 @@ TEST_CASE("Printing current temperature/usage information")
                     {
                         CHECK(!device.name.empty());
                         llog::Print("Testing GPU:", device.name);
-                        
+
                         auto t1 = std::chrono::high_resolution_clock::now();
                         auto temp = sensors::getTemp(device);
                         auto t2 = std::chrono::high_resolution_clock::now();

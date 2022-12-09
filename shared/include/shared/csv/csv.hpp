@@ -1,13 +1,15 @@
 #pragma once
-#include <filesystem>
 #include "sensors/Device.hpp"
+#include <filesystem>
 #include <vector>
 
 namespace csv
 {
     enum class MeasurementType
     {
-        Load, Temperature, Both
+        Load,
+        Temperature,
+        Both
     };
 
     class Csv
@@ -18,6 +20,7 @@ namespace csv
         void add(const sensors::Device& device);
         std::vector<int> getLastnData(int n, int column = 1);
         void removeFileOnDestruct();
+
     private:
         std::filesystem::path m_fileName;
         MeasurementType m_measurementType;
