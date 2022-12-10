@@ -32,7 +32,7 @@ add_executable(${PROJECT_NAME}
     main.cpp
 )
 
-target_link_libraries(${PROJECT_NAME} PUBLIC tests)
+target_link_libraries(${PROJECT_NAME} PUBLIC tests nogui)
 file(DOWNLOAD
     https://raw.githubusercontent.com/LiamMesarec/LLOG/main/llog.hpp
     ${CMAKE_CURRENT_SOURCE_DIR}/libraries/LLOG/llog.hpp
