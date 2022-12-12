@@ -16,4 +16,4 @@ FetchContent_Declare(
 )
 
 FetchContent_MakeAvailable(cargs)
-target_link_libraries(nogui PUBLIC cargs sensors)
+target_link_libraries(nogui PUBLIC cargs sensors shared)

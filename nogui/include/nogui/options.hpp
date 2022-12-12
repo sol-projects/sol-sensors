@@ -22,7 +22,7 @@ namespace nogui
             .access_letters = "i",
             .access_name = "interval",
             .value_name = "ms",
-            .description = "Set the measurements interval."
+            .description = "Set the interval in milliseconds at which measurements are performed."
         },
 
         {

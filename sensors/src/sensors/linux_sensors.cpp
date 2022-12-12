@@ -352,7 +352,7 @@ namespace sensors
                 }
             case Device::Type::RAM:
                 {
-                    static std::ifstream ramFile(raminfo);
+                    std::ifstream ramFile(raminfo);
                     auto getRam = [&](const std::string& name) {
                         std::string line;
                         while (std::getline(ramFile, line))
@@ -404,7 +404,7 @@ namespace sensors
             case Device::Type::CPU:
                 {
                     static const std::string cpuTempPath = findCpuTempPath();
-                    static std::ifstream tempFile(cpuTempPath);
+                    std::ifstream tempFile(cpuTempPath);
 
                     if (!tempFile)
                     {

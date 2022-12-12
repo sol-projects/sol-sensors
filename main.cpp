@@ -6,13 +6,16 @@
 #include "tests/nogui.hpp"
 #include <DOCTEST/doctest.h>
 #include <cargs.h>
+#include "nogui/include/nogui/options.hpp"
 
 int main(int argc, char* argv[])
 {
-    doctest::Context context;
-    int result = context.run();
+    nogui::run(argc, argv);
 
-    if (context.shouldExit())
+    doctest::Context doctestContext;
+    int result = doctestContext.run();
+
+    if (doctestContext.shouldExit())
     {
         return result;
     }
