@@ -5,6 +5,7 @@ add_library(sensors
 
 target_include_directories(sensors PUBLIC
         include
+        ${CMAKE_BINARY_DIR}
 )
 
 file(DOWNLOAD
@@ -12,3 +13,5 @@ file(DOWNLOAD
     ${CMAKE_BINARY_DIR}/LLOG/llog.hpp
     SHOW_PROGRESS
 )
+
+target_compile_features(sensors PUBLIC cxx_std_20)
