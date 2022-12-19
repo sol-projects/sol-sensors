@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 FetchContent_Declare(
     sensors
-    URL https://github.com/sol-projects/rpo/files/10262156/sensors.zip
+    URL https://github.com/sol-projects/rpo/files/10262169/sensors.zip
     GIT_TAG main
     DOWNLOAD_DIR sensors
 )

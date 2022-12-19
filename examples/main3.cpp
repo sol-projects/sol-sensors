@@ -5,7 +5,7 @@
 
 int main()
 {
-    auto devices = sensors::getDevices(sensors::Device::Type::CPU);
+    auto devices = sensors::getDevices(sensors::Device::Type::RAM);
 
     for(auto& device : devices)
     {
@@ -27,7 +27,7 @@ int main()
         }
         else
         {
-            std::cout << device.load << '\n';
+            std::cout << device.temperature << '\n';
         }
     }
 }
