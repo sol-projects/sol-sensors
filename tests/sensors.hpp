@@ -1,5 +1,6 @@
 #pragma once
 #include "sensors/sensors.hpp"
+#include "sensors/error.hpp"
 #include <DOCTEST/doctest.h>
 #include <LLOG/llog.hpp>
 #include <cassert>
@@ -33,9 +34,9 @@ TEST_CASE("Printing current temperature/usage information")
                         auto temp = sensors::getTemp(device);
                         auto t2 = std::chrono::high_resolution_clock::now();
                         auto time = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1);
-                        if (temp == 0)
+                        if (temp == sensors::error::code)
                         {
-                            llog::Print(llog::pt::warning, "Temperature not supported.");
+                            llog::Print(llog::pt::warning, "CPU temperature not supported.");
                         }
                         else
                         {
@@ -47,9 +48,9 @@ TEST_CASE("Printing current temperature/usage information")
                         auto load = sensors::getLoad(device);
                         t2 = std::chrono::high_resolution_clock::now();
                         time = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1);
-                        if (load == 0)
+                        if (load == sensors::error::code)
                         {
-                            llog::Print(llog::pt::warning, "Load not supported.");
+                            llog::Print(llog::pt::warning, "CPU load not supported.");
                         }
                         else
                         {
@@ -68,9 +69,9 @@ TEST_CASE("Printing current temperature/usage information")
                         auto temp = sensors::getTemp(device);
                         auto t2 = std::chrono::high_resolution_clock::now();
                         auto time = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1);
-                        if (temp == 0)
+                        if (temp == sensors::error::code)
                         {
-                            llog::Print(llog::pt::warning, "Temperature not supported.");
+                            llog::Print(llog::pt::warning, "RAM temperature not supported.");
                         }
                         else
                         {
@@ -81,9 +82,9 @@ TEST_CASE("Printing current temperature/usage information")
                         auto load = sensors::getLoad(device);
                         t2 = std::chrono::high_resolution_clock::now();
                         time = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1);
-                        if (load == 0)
+                        if (load == sensors::error::code)
                         {
-                            llog::Print(llog::pt::warning, "Load not supported.");
+                            llog::Print(llog::pt::warning, "RAM load not supported.");
                         }
                         else
                         {
@@ -102,9 +103,9 @@ TEST_CASE("Printing current temperature/usage information")
                         auto temp = sensors::getTemp(device);
                         auto t2 = std::chrono::high_resolution_clock::now();
                         auto time = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1);
-                        if (temp == 0)
+                        if (temp == sensors::error::code)
                         {
-                            llog::Print(llog::pt::warning, "Temperature not supported.");
+                            llog::Print(llog::pt::warning, "GPU temperature not supported.");
                         }
                         else
                         {
@@ -115,9 +116,9 @@ TEST_CASE("Printing current temperature/usage information")
                         auto load = sensors::getLoad(device);
                         t2 = std::chrono::high_resolution_clock::now();
                         time = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1);
-                        if (load == 0)
+                        if (load == sensors::error::code)
                         {
-                            llog::Print(llog::pt::warning, "Load not supported.");
+                            llog::Print(llog::pt::warning, "GPU load not supported.");
                         }
                         else
                         {
@@ -137,9 +138,9 @@ TEST_CASE("Printing current temperature/usage information")
                         auto t2 = std::chrono::high_resolution_clock::now();
                         auto time = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1);
 
-                        if (temp == 0)
+                        if (temp == sensors::error::code)
                         {
-                            llog::Print(llog::pt::warning, "Temperature not supported.");
+                            llog::Print(llog::pt::warning, "VRAM temperature not supported.");
                         }
                         else
                         {
@@ -150,9 +151,9 @@ TEST_CASE("Printing current temperature/usage information")
                         auto load = sensors::getLoad(device);
                         t2 = std::chrono::high_resolution_clock::now();
                         time = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1);
-                        if (load == 0)
+                        if (load == sensors::error::code)
                         {
-                            llog::Print(llog::pt::warning, "Load not supported.");
+                            llog::Print(llog::pt::warning, "VRAM load not supported.");
                         }
                         else
                         {

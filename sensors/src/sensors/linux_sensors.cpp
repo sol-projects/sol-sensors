@@ -9,6 +9,7 @@
 #include <filesystem>
 #include <fstream>
 #include <string>
+#include "sensors/error.hpp"
 
 namespace
 {
@@ -49,7 +50,7 @@ namespace
 
     const auto gpuType = findGpuType();
 
-    int findNumCpuCores()
+    [[maybe_unused]]int findNumCpuCores()
     {
         std::ifstream file("/proc/stat");
 
@@ -270,7 +271,6 @@ namespace sensors
         {
             case Device::Type::CPU:
                 {
-                    static const int numCores = findNumCpuCores();
                     std::ifstream file(cpuUsageInfo);
 
                     if (!file)
@@ -367,7 +367,7 @@ namespace sensors
                             }
                         }
 
-                        return 0;
+                        return error::code;
                     };
 
                     if (!ramFile)
@@ -388,7 +388,7 @@ namespace sensors
                         return std::stoi(memUsedStr.substr(0, std::size(memUsedStr) - 4)) * 0.01;
                     }
 
-                    return 0;
+                    return error::code;
                 }
             case Device::Type::Any:
                 llog::Print(llog::pt::error, "Getting load from invalid device type with name:", device.name);
@@ -403,13 +403,18 @@ namespace sensors
         {
             case Device::Type::CPU:
                 {
-                    static const std::string cpuTempPath = findCpuTempPath();
+                    const std::string cpuTempPath = findCpuTempPath();
+                    if(cpuTempPath.empty())
+                    {
+                        return error::code;
+                    }
+
                     std::ifstream tempFile(cpuTempPath);
 
                     if (!tempFile)
                     {
                         llog::Print(llog::pt::error, "Cannot load CPU temperature from file:", cpuTempPath);
-                        return 0;
+                        return error::code;
                     }
 
                     tempFile.seekg(0);
@@ -428,7 +433,7 @@ namespace sensors
                 }
             case Device::Type::RAM:
                 {
-                    return 0;
+                    return error::code;
                 }
             case Device::Type::VRAM:
                 {
@@ -439,16 +444,16 @@ namespace sensors
                             return std::stoi(memTemp);
                         }
 
-                        return 0;
+                        return error::code;
                     }
 
-                    return 0;
+                    return error::code;
                 }
             case Device::Type::Any:
                 llog::Print(llog::pt::error, "Getting temperature from invalid device type with name:", device.name);
         }
 
-        return 0;
+        return error::code;
     }
 }
 #endif

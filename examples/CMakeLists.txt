@@ -13,6 +13,6 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(sensors)
 
-add_executable(${PROJECT_NAME} main2.cpp)
+add_executable(${PROJECT_NAME} main3.cpp)
 
 target_link_libraries(${PROJECT_NAME} PUBLIC sensors)
