@@ -9,6 +9,11 @@ libraries/
 # Testing
 Testing/
 
+# CMake
+CMakeFiles/
+Makefile
+*.cmake
+
 # Config
 compile_commands.json
 

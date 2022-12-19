@@ -1,6 +1,6 @@
 #pragma once
-#include <string>
 #include <iostream>
+#include <string>
 
 namespace sensors
 {
@@ -8,7 +8,11 @@ namespace sensors
     {
         enum class Type
         {
-            CPU, GPU, RAM, Any
+            CPU,
+            GPU,
+            RAM,
+            VRAM,
+            Any
         };
 
         static int generateID()
