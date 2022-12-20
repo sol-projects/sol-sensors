@@ -14,7 +14,7 @@
 #include <DOCTEST/doctest.h>
 #endif
 
-int main(int argc, char* argv[])
+int main([[maybe_unused]]int argc, [[maybe_unused]]char* argv[])
 {
 #ifdef NOGUI
     nogui::run(argc, argv);
