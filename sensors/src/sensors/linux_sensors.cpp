@@ -3,13 +3,13 @@
 
 #ifdef __linux__
 
+#include "sensors/error.hpp"
 #include <LLOG/llog.hpp>
 #include <chrono>
 #include <cstring>
 #include <filesystem>
 #include <fstream>
 #include <string>
-#include "sensors/error.hpp"
 
 namespace
 {
@@ -50,7 +50,7 @@ namespace
 
     const auto gpuType = findGpuType();
 
-    [[maybe_unused]]int findNumCpuCores()
+    [[maybe_unused]] int findNumCpuCores()
     {
         std::ifstream file("/proc/stat");
 
@@ -404,7 +404,7 @@ namespace sensors
             case Device::Type::CPU:
                 {
                     const std::string cpuTempPath = findCpuTempPath();
-                    if(cpuTempPath.empty())
+                    if (cpuTempPath.empty())
                     {
                         return error::code;
                     }

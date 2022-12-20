@@ -15,7 +15,7 @@ namespace csv
     class Csv
     {
     public:
-        Csv(const sensors::Device& device, int interval, MeasurementType measurementType);
+        Csv(const sensors::Device& device, int interval, MeasurementType measurementType, const std::string& path = "");
         ~Csv();
         void add(const sensors::Device& device);
         std::vector<int> getLastnData(int n, int column = 1);

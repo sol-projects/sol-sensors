@@ -1,6 +1,6 @@
 #pragma once
-#include "sensors/sensors.hpp"
 #include "sensors/error.hpp"
+#include "sensors/sensors.hpp"
 #include <DOCTEST/doctest.h>
 #include <LLOG/llog.hpp>
 #include <cassert>

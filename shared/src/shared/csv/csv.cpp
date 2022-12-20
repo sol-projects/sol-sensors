@@ -6,7 +6,7 @@
 
 namespace csv
 {
-    Csv::Csv(const sensors::Device& device, int interval, MeasurementType measurementType)
+    Csv::Csv(const sensors::Device& device, int interval, MeasurementType measurementType, const std::string& path)
         : m_measurementType(measurementType)
         , m_removeFileOnDestruct(false)
     {
@@ -22,7 +22,20 @@ namespace csv
         filename += std::to_string(interval) + "_";
         filename += device.name + ".txt";
 
-        m_fileName = filename;
+        if (!path.empty())
+        {
+            m_fileName = path + "/" + filename;
+        }
+        else
+        {
+            m_fileName = filename;
+        }
+
+        if (!std::filesystem::is_directory(path) || !std::filesystem::exists(path))
+        {
+            std::filesystem::create_directory(path);
+        }
+
         std::ofstream file(m_fileName);
 
         if (!file)
