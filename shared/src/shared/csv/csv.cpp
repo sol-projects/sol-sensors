@@ -31,7 +31,7 @@ namespace csv
             m_fileName = filename;
         }
 
-        if (!std::filesystem::is_directory(path) || !std::filesystem::exists(path))
+        if (!path.empty() && (!std::filesystem::is_directory(path) || !std::filesystem::exists(path)))
         {
             std::filesystem::create_directory(path);
         }
