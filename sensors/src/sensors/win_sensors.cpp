@@ -18,12 +18,6 @@
 #include <string>
 #include <sysinfoapi.h>
 #include <tchar.h>
-#include <processthreadsapi.h>
-#include <sysinfoapi.h>
-#include <Intrin.h>
-#include <atomic>
-#include <iostream>
-#include <tchar.h> 
 #define NVAPI_MAX_PHYSICAL_GPUS 64
 #define NVAPI_MAX_USAGES_PER_GPU 34
 
@@ -88,7 +82,7 @@ namespace
         _previousIdleTicks = idleTicks;
         return ret;
     }
-     static unsigned long long FileTimeToInt64(const FILETIME & ft) {return (((unsigned long long)(ft.dwHighDateTime))<<32)|((unsigned long long)ft.dwLowDateTime);}
+    static unsigned long long FileTimeToInt64(const FILETIME& ft) { return (((unsigned long long)(ft.dwHighDateTime)) << 32) | ((unsigned long long)ft.dwLowDateTime); }
 
     std::vector<sensors::Device> CPUinfo()
     {
@@ -137,7 +131,7 @@ namespace
         if (!GlobalMemoryStatusEx(&memstat))
             std::cerr << "Ram error";
         int a = memstat.ullTotalPhys / 1000000;
-        return sensors::Device { sensors::Device::generateID(), std::to_string(static_cast<int>(a *0.001 )) + " GB RAM", sensors::Device::Type::RAM, 0, 0 };
+        return sensors::Device { sensors::Device::generateID(), std::to_string(static_cast<int>(a * 0.001)) + " GB RAM", sensors::Device::Type::RAM, 0, 0 };
     }
 
     std::vector<sensors::Device> VRAMinfo()
@@ -166,7 +160,6 @@ namespace
             vrams.push_back({ sensors::Device::generateID(), (rez / 1024 / 1024) + " VRAM", sensors::Device::Type::VRAM, 0, 0 });
         }
         return vrams;
-
     }
 
 }
@@ -283,7 +276,8 @@ namespace sensors
                         FILE* pFile = _popen(fullQuery.c_str(), "r");
                         std::string out;
                         char buffer[10];
-                        if (fgets(buffer, 128, pFile) != NULL){
+                        if (fgets(buffer, 128, pFile) != NULL)
+                        {
                             out += buffer;
                         }
                         _pclose(pFile);
