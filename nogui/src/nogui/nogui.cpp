@@ -25,16 +25,17 @@ namespace nogui
             std::vector<sensors::Device> devices;
 
             auto addToDevicesIfExists = [&devicesToMeasure, &devices](const std::string& deviceName, sensors::Device::Type type) {
-                if (devicesToMeasure.find(deviceName) != std::string::npos)
+                if (auto found = devicesToMeasure.find(deviceName); found != std::string::npos)
                 {
                     auto newDevices = sensors::getDevices(type);
                     devices.insert(std::end(devices), std::begin(newDevices), std::end(newDevices));
+                    devicesToMeasure.erase(found, deviceName.size());
                 }
             };
 
             addToDevicesIfExists("cpu", sensors::Device::Type::CPU);
-            addToDevicesIfExists("ram", sensors::Device::Type::RAM);
             addToDevicesIfExists("vram", sensors::Device::Type::VRAM);
+            addToDevicesIfExists("ram", sensors::Device::Type::RAM);
             addToDevicesIfExists("gpu", sensors::Device::Type::GPU);
 
             return devices;
