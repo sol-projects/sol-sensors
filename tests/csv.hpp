@@ -32,4 +32,19 @@ TEST_CASE("Testing saving and reading from a file.")
         llog::Print(temps);
         std::cout << std::endl;
     }
+
+    SUBCASE("Saving into file into a new directory.")
+    {
+        auto cpu = sensors::getDevices(sensors::Device::Type::CPU)[0];
+        csv::Csv cpuCsv(cpu, 100, csv::MeasurementType::Both, "new");
+        cpuCsv.removeFileOnDestruct();
+
+        for (int i = 0; i < 2; i++)
+        {
+            std::this_thread::sleep_for(40ms);
+            cpu.load = sensors::getLoad(cpu);
+            cpu.temperature = sensors::getTemp(cpu);
+            cpuCsv.add(cpu);
+        }
+    }
 }

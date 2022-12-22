@@ -11,6 +11,7 @@ namespace nogui
         bool load = false;
         std::string devices;
         bool file = false;
+        std::string path;
     };
 
     // clang-format off
@@ -55,6 +56,14 @@ namespace nogui
             .access_name = "file",
             .value_name = nullptr,
             .description = "Save measurements to an automatically generated CSV file."
+        },
+
+        {
+            .identifier = 'p',
+            .access_letters = "p",
+            .access_name = "path",
+            .value_name = "path",
+            .description = "Set the path for measurement csv files."
         },
 
         {
