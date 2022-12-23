@@ -5,7 +5,7 @@
 #include <QWidgetData>
 #include <QWidget>
 #include "gui/settings.h"
-#include "gui/qcustomplot.h" 
+#include "qcustomplot.h"
 #include "gui/axistag.h"
 
 QT_BEGIN_NAMESPACE
