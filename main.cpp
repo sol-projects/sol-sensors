@@ -21,6 +21,7 @@
 #include <QGridLayout>
 #include <QPushButton>
 #include "gui/include/gui/mainwindow.h"
+#include <thread>
 #endif
 int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 {
@@ -51,20 +52,25 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
     window->setLayout(layout);
     MainWindow mainWindov = new MainWindow();
     mainWindov.show();
-    
-    return app.exec();
 #endif
 #ifdef TESTS
     doctest::Context doctestContext;
-    int result = doctestContext.run();
+    [[maybe_unused]]int result = doctestContext.run();
 
     if (doctestContext.shouldExit())
     {
+        #ifndef GUI
         return result;
+        #endif
     }
 
+    #ifndef GUI
     return result;
+    #endif
 #endif
 
+#ifdef GUI
+    app.exec();
+#endif
     return 0;
 }
