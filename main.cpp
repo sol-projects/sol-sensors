@@ -33,7 +33,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
     QApplication app(argc, argv);
 
     QWidget *window = new QWidget;
-    window->setWindowTitle("My App");
+    window->setWindowTitle("SOL Sensors");
 
     QGridLayout *layout = new QGridLayout;
 
