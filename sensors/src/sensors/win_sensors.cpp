@@ -28,8 +28,6 @@ typedef int (*NvAPI_EnumPhysicalGPUs_t)(int** handles, int* count);
 typedef int (*NvAPI_GPU_GetUsages_t)(int* handle, unsigned int* usages);
 namespace
 {
-
-    // declare variables you can use in this file
     enum class GPUType
     {
         Nvidia,
@@ -45,17 +43,12 @@ namespace
         std::string fullQuery = "wmic path win32_VideoController get AdapterCompatibility";
         FILE* pFile = _popen(fullQuery.c_str(), "r");
         char buffer[256];
-        while (!feof(pFile))
+         while (!feof(pFile))
         {
-            if (fgets(buffer, 128, pFile) != NULL)
-            {
-                if (i > 21)
-                {
-                    out += buffer;
-                }
-            }
-            i++;
+            if (fgets(buffer, 256, pFile) != NULL)
+                out += buffer;
         }
+        std::cout<<buffer<<"<--TEST";
         _pclose(pFile);
         if (out == "NVIDIA")
         {
@@ -67,7 +60,9 @@ namespace
         }
         return GPUType::Unknown;
     }
+    
     const auto gpuType = GetGPUType();
+    
     static float CalculateCPULoad(unsigned long long idleTicks, unsigned long long totalTicks)
     {
         static unsigned long long _previousTotalTicks = 0;
@@ -82,6 +77,7 @@ namespace
         _previousIdleTicks = idleTicks;
         return ret;
     }
+    
     static unsigned long long FileTimeToInt64(const FILETIME& ft) { return (((unsigned long long)(ft.dwHighDateTime)) << 32) | ((unsigned long long)ft.dwLowDateTime); }
 
     std::vector<sensors::Device> CPUinfo()
@@ -101,6 +97,7 @@ namespace
         cpus.push_back({ sensors::Device::generateID(), out, sensors::Device::Type::CPU, 0, 0 });
         return cpus;
     }
+    
     std::vector<sensors::Device> GPUinfo()
     {
         std::string out;
@@ -118,6 +115,7 @@ namespace
         gpus.push_back({ sensors::Device::generateID(), out, sensors::Device::Type::GPU, 0, 0 });
         return gpus;
     }
+    
     sensors::Device RAMinfo()
     {
         sensors::Device ram {
@@ -213,17 +211,51 @@ namespace sensors
                 }
             case Device::Type::GPU:
                 {
-                    if (gpuType == GPUType::Nvidia)
-                    {
-                        std::string fullQuery = "nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader";
-                        FILE* pFile = _popen(fullQuery.c_str(), "r");
+                    
+                        HMODULE hmod = LoadLibraryA("nvapi.dll");
+                        if (hmod == NULL)
+                        {
+                            std::cerr << "Couldn't find nvapi.dll" << std::endl;
+                            return 1;
+                        }
 
-                        char buffer[256];
-                        char* out = fgets(buffer, sizeof(buffer), pFile);
+                        // nvapi.dll internal function pointers
+                        NvAPI_QueryInterface_t NvAPI_QueryInterface = NULL;
+                        NvAPI_Initialize_t NvAPI_Initialize = NULL;
+                        NvAPI_EnumPhysicalGPUs_t NvAPI_EnumPhysicalGPUs = NULL;
+                        NvAPI_GPU_GetUsages_t NvAPI_GPU_GetUsages = NULL;
 
-                        _pclose(pFile);
-                        return std::stoi(std::string(out, out + std::strlen(out) - 1));
-                    }
+                        // nvapi_QueryInterface is a function used to retrieve other internal functions in nvapi.dll
+                        NvAPI_QueryInterface = (NvAPI_QueryInterface_t)GetProcAddress(hmod, "nvapi_QueryInterface");
+
+                        // some useful internal functions that aren't exported by nvapi.dll
+                        NvAPI_Initialize = (NvAPI_Initialize_t)(*NvAPI_QueryInterface)(0x0150E828);
+                        NvAPI_EnumPhysicalGPUs = (NvAPI_EnumPhysicalGPUs_t)(*NvAPI_QueryInterface)(0xE5AC921F);
+                        NvAPI_GPU_GetUsages = (NvAPI_GPU_GetUsages_t)(*NvAPI_QueryInterface)(0x189A1FDF);
+
+                        if (NvAPI_Initialize == NULL || NvAPI_EnumPhysicalGPUs == NULL || NvAPI_EnumPhysicalGPUs == NULL || NvAPI_GPU_GetUsages == NULL)
+                        {
+                            std::cerr << "Couldn't get functions in nvapi.dll" << std::endl;
+                            return error::code;
+                        }
+
+                        // inicializacija funkcije preden jo poklicemo
+                        (*NvAPI_Initialize)();
+
+                        int gpuCount = 0;
+                        int* gpuHandles[NVAPI_MAX_PHYSICAL_GPUS] = { NULL };
+                        unsigned int gpuUsages[NVAPI_MAX_USAGES_PER_GPU] = { 0 };
+
+                        // gpuUsages v njega shranimo podatke
+                        gpuUsages[0] = (NVAPI_MAX_USAGES_PER_GPU * 4) | 0x10000;
+
+                        (*NvAPI_EnumPhysicalGPUs)(gpuHandles, &gpuCount);
+
+                        (*NvAPI_GPU_GetUsages)(gpuHandles[0], gpuUsages);
+                        int usage = gpuUsages[3];
+
+                        return usage;
+                    
 
                     return error::code;
                 }
@@ -250,7 +282,7 @@ namespace sensors
                         return std::stoi(memUsedStr.substr(0, std::size(memUsedStr) - 4)) * 0.01;
                     }
 
-                    return 1;
+                    return error::code;
                 }
             case Device::Type::Any:
                 {
@@ -281,6 +313,7 @@ namespace sensors
                             out += buffer;
                         }
                         _pclose(pFile);
+                        std::cout<<out<<"<---- TEST";
                         return std::stoi(out);
                     }
 
@@ -306,7 +339,7 @@ namespace sensors
                             return std::stoi(out);
                         }
 
-                        return 1;
+                        return error::code;
                     }
 
                     return 1;
