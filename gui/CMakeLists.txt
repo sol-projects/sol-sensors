@@ -18,8 +18,14 @@ qt5_wrap_ui(UI_SOURCES ${UI_FILES})
 add_library(gui
     src/gui/mainwindow.cpp
     src/gui/settings.cpp
+    src/gui/settings.ui
+    src/gui/mainwindow.ui
     src/gui/axistag.cpp
     src/gui/qcustomplot.cpp
+    include/gui/settings.h
+    include/gui/mainwindow.h
+    include/gui/axistag.h
+    include/gui/qcustomplot.h
     ${UI_SOURCES}
 )
 

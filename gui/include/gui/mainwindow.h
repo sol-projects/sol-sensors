@@ -15,11 +15,10 @@ QT_END_NAMESPACE
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
-
 public:
     MainWindow (QWidget *parent = nullptr);
     //void addWidgetFunc(QWidget *widget);
-    ~MainWindow();
+    virtual ~MainWindow();
 
 private slots:
     void on_actionSave_triggered();
