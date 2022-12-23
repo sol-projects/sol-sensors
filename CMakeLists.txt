@@ -55,9 +55,9 @@ add_executable(${PROJECT_NAME}
 )
 
 if(BUILD_NOGUI)
-    target_link_libraries(${PROJECT_NAME} PUBLIC tests nogui)
+    target_link_libraries(${PROJECT_NAME} PUBLIC tests nogui gui)
 else()
-    target_link_libraries(${PROJECT_NAME} PUBLIC tests)
+    target_link_libraries(${PROJECT_NAME} PUBLIC tests gui)
 endif()
 
 file(DOWNLOAD
