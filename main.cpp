@@ -15,12 +15,12 @@
 #endif
 
 #ifdef GUI
+#include "gui/include/gui/mainwindow.h"
 #include <QApplication>
+#include <QGridLayout>
 #include <QLabel>
 #include <QLineEdit>
-#include <QGridLayout>
 #include <QPushButton>
-#include "gui/include/gui/mainwindow.h"
 #include <thread>
 #endif
 int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
@@ -32,16 +32,16 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 #ifdef GUI
     QApplication app(argc, argv);
 
-    QWidget *window = new QWidget;
+    QWidget* window = new QWidget;
     window->setWindowTitle("SOL Sensors");
 
-    QGridLayout *layout = new QGridLayout;
+    QGridLayout* layout = new QGridLayout;
 
-    QLabel *label1 = new QLabel("Name");
-    QLineEdit *textName1 = new QLineEdit;
+    QLabel* label1 = new QLabel("Name");
+    QLineEdit* textName1 = new QLineEdit;
 
-    QLabel *label2 = new QLabel("Name");
-    QLineEdit *textName2 = new QLineEdit;
+    QLabel* label2 = new QLabel("Name");
+    QLineEdit* textName2 = new QLineEdit;
 
     layout->addWidget(label1, 0, 0);
     layout->addWidget(textName1, 0, 1);
@@ -55,18 +55,18 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 #endif
 #ifdef TESTS
     doctest::Context doctestContext;
-    [[maybe_unused]]int result = doctestContext.run();
+    [[maybe_unused]] int result = doctestContext.run();
 
     if (doctestContext.shouldExit())
     {
-        #ifndef GUI
+#ifndef GUI
         return result;
-        #endif
+#endif
     }
 
-    #ifndef GUI
+#ifndef GUI
     return result;
-    #endif
+#endif
 #endif
 
 #ifdef GUI

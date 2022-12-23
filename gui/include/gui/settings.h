@@ -2,15 +2,16 @@
 #define SETTINGS_H
 #include <QDialog>
 
-namespace Ui {
-class MyDialog;
+namespace Ui
+{
+    class MyDialog;
 }
 
 class MyDialog : public QDialog
 {
     Q_OBJECT
 public:
-    explicit MyDialog(QWidget *parent = 0);
+    explicit MyDialog(QWidget* parent = 0);
     virtual ~MyDialog();
 
 private slots:
@@ -25,6 +26,6 @@ private slots:
     void on_spinBox_valueChanged(int arg1);
 
 private:
-    Ui::MyDialog *ui;
+    Ui::MyDialog* ui;
 };
 #endif // SETTINGS_H
