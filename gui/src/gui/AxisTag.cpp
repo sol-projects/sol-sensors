@@ -23,7 +23,7 @@
 **          Version: 2.1.1                                                **
 ****************************************************************************/
 
-#include "gui/axistag.h"
+#include "gui/AxisTag.hpp"
 
 AxisTag::AxisTag(QCPAxis* parentAxis)
     : QObject(parentAxis)

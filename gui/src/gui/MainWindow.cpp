@@ -1,4 +1,4 @@
-#include "gui/mainwindow.h"
+#include "gui/MainWindow.hpp"
 #include "gui/ui_mainwindow.h"
 #include <QLayout>
 

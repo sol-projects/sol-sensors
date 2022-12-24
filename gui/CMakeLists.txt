@@ -27,15 +27,16 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
 add_library(gui
-    src/gui/mainwindow.cpp
-    src/gui/settings.cpp
+    src/gui/gui.cpp
+    src/gui/MainWindow.cpp
+    src/gui/Settings.cpp
     src/gui/settings.ui
     src/gui/mainwindow.ui
-    src/gui/axistag.cpp
+    src/gui/AxisTag.cpp
     ../libraries/QCUSTOMPLOT/qcustomplot-source/qcustomplot.cpp
-    include/gui/settings.h
-    include/gui/mainwindow.h
-    include/gui/axistag.h
+    include/gui/Settings.hpp
+    include/gui/MainWindow.hpp
+    include/gui/AxisTag.hpp
     ../libraries/QCUSTOMPLOT/qcustomplot-source/qcustomplot.h
 )
 

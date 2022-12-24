@@ -1,4 +1,4 @@
-#include "gui/settings.h"
+#include "gui/Settings.hpp"
 #include "gui/ui_settings.h"
 
 MyDialog::MyDialog(QWidget* parent)

@@ -1,3 +1,5 @@
+#include <cstring>
+
 #ifdef NOGUI
 #include "nogui/include/nogui/nogui.hpp"
 #include "nogui/include/nogui/options.hpp"
@@ -15,62 +17,45 @@
 #endif
 
 #ifdef GUI
-#include "gui/include/gui/mainwindow.h"
-#include <QApplication>
-#include <QGridLayout>
-#include <QLabel>
-#include <QLineEdit>
-#include <QPushButton>
-#include <thread>
+#include "gui/include/gui/gui.hpp"
 #endif
 int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 {
-#ifdef NOGUI
-    nogui::run(argc, argv);
-#endif
-
-#ifdef GUI
-    QApplication app(argc, argv);
-
-    QWidget* window = new QWidget;
-    window->setWindowTitle("SOL Sensors");
-
-    QGridLayout* layout = new QGridLayout;
-
-    QLabel* label1 = new QLabel("Name");
-    QLineEdit* textName1 = new QLineEdit;
-
-    QLabel* label2 = new QLabel("Name");
-    QLineEdit* textName2 = new QLineEdit;
-
-    layout->addWidget(label1, 0, 0);
-    layout->addWidget(textName1, 0, 1);
-
-    layout->addWidget(label2, 1, 0);
-    layout->addWidget(textName2, 1, 1);
-
-    window->setLayout(layout);
-    MainWindow mainWindov = new MainWindow();
-    mainWindov.show();
-#endif
-#ifdef TESTS
-    doctest::Context doctestContext;
-    [[maybe_unused]] int result = doctestContext.run();
-
-    if (doctestContext.shouldExit())
+    if (argc > 1)
     {
-#ifndef GUI
-        return result;
+        if (!std::strcmp(argv[1], "run_tests"))
+        {
+#ifdef TESTS
+            doctest::Context doctestContext;
+            int result = doctestContext.run();
+
+            if (doctestContext.shouldExit())
+            {
+                return result;
+            }
+
+            return result;
+#else
+            return EXIT_FAILURE;
+#endif
+        }
+        else
+        {
+#ifdef NOGUI
+            nogui::run(argc, argv);
+#else
+            return EXIT_FAILURE;
+#endif
+        }
+    }
+    else
+    {
+#ifdef GUI
+        gui::run(argc, argv);
+#else
+        return EXIT_FAILURE;
 #endif
     }
 
-#ifndef GUI
-    return result;
-#endif
-#endif
-
-#ifdef GUI
-    app.exec();
-#endif
-    return 0;
+    return EXIT_SUCCESS;
 }

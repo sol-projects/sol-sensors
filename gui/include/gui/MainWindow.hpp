@@ -1,8 +1,6 @@
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
-
-#include "gui/axistag.h"
-#include "gui/settings.h"
+#pragma once
+#include "gui/AxisTag.hpp"
+#include "gui/Settings.hpp"
 #include "qcustomplot.h"
 #include <QMainWindow>
 #include <QWidget>
@@ -39,4 +37,3 @@ private:
     AxisTag* mTag2;
     QTimer mDataTimer;
 };
-#endif // MAINWINDOW_H
