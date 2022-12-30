@@ -43,7 +43,7 @@ TEST_CASE("Printing current temperature/usage information")
                             llog::Print("Temperature:", temp, "Time took:", time.count(), "μs");
                         }
 
-                        std::this_thread::sleep_for(200ms);
+                        std::this_thread::sleep_for(100ms);
                         t1 = std::chrono::high_resolution_clock::now();
                         auto load = sensors::getLoad(device);
                         t2 = std::chrono::high_resolution_clock::now();
@@ -51,6 +51,28 @@ TEST_CASE("Printing current temperature/usage information")
                         if (load == sensors::error::code)
                         {
                             llog::Print(llog::pt::warning, "CPU load not supported.");
+                        }
+                        else
+                        {
+                            auto loadf = std::to_string(load);
+                            llog::Print("Load: ", std::string(loadf.substr(0, loadf.size() - 1) + "." + loadf.back() + "%"), "Time took:", time.count(), "μs");
+                        }
+                    }
+                    break;
+
+                case sensors::Device::Type::CPUThread:
+                    {
+                        CHECK(!device.name.empty());
+                        llog::Print("Testing CPU thread:", device.name);
+
+                        std::this_thread::sleep_for(100ms);
+                        auto t1 = std::chrono::high_resolution_clock::now();
+                        auto load = sensors::getLoad(device);
+                        auto t2 = std::chrono::high_resolution_clock::now();
+                        auto time = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1);
+                        if (load == sensors::error::code)
+                        {
+                            llog::Print(llog::pt::warning, "CPU thread load not supported.");
                         }
                         else
                         {

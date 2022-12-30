@@ -138,11 +138,156 @@ namespace
             if (const std::string nameStart = "model name	: "; line.starts_with(nameStart))
             {
                 cpus.push_back({ sensors::Device::generateID(), line.substr(std::size(nameStart)), sensors::Device::Type::CPU, 0, 0 });
-                break; // temporary until "more cpu cores" / "more cpus" option added
+                break;
             }
         }
 
         return cpus;
+    }
+
+    std::vector<sensors::Device> CPUThreadinfo()
+    {
+        std::string parentName = CPUinfo().at(0).name;
+        std::ifstream file(cpuUsageInfo);
+
+        if (!file)
+        {
+            llog::Print(llog::pt::error, "Cannot open ", cpuUsageInfo);
+            return {};
+        }
+
+        std::vector<sensors::Device> threads;
+
+        std::string line;
+        std::getline(file, line);
+        int threadNum = 0;
+        while (std::getline(file, line))
+        {
+            if (line.starts_with("cpu"))
+            {
+                threads.push_back({ sensors::Device::generateID(), parentName + " thread #" + std::to_string(threadNum), sensors::Device::Type::CPUThread, 0, 0 });
+                threadNum++;
+            }
+            else
+            {
+                break;
+            }
+        }
+
+        return threads;
+    }
+
+    int CPUload(int thread = -1) // -1 is average of all threads
+    {
+        std::ifstream file(cpuUsageInfo);
+
+        if (!file)
+        {
+            llog::Print(llog::pt::error, "Cannot open file", cpuUsageInfo);
+            return sensors::error::code;
+        }
+
+        static std::vector<std::size_t> prevIdle;
+        static std::vector<std::size_t> idle;
+        static std::vector<std::size_t> prevUser;
+        static std::vector<std::size_t> user;
+        static std::vector<std::size_t> prevNice;
+        static std::vector<std::size_t> nice;
+        static std::vector<std::size_t> prevSystem;
+        static std::vector<std::size_t> system;
+        static std::vector<std::size_t> prevIoWait;
+        static std::vector<std::size_t> ioWait;
+        static std::vector<std::size_t> prevIrq;
+        static std::vector<std::size_t> irq;
+        static std::vector<std::size_t> prevSoftIrq;
+        static std::vector<std::size_t> softIrq;
+        static std::vector<std::size_t> prevSteal;
+        static std::vector<std::size_t> steal;
+
+        if(thread != -1)
+        {
+            std::string line;
+            std::getline(file, line);
+            while(std::getline(file, line))
+            {
+                if(line.at(3) - '0' == thread)
+                {
+                    break;
+                }
+            }
+        }
+
+        thread += 1;
+        if(static_cast<int>(std::size(prevIdle)) < thread)
+        {
+            llog::Print(llog::pt::warning, "Threads initialized in non-sequential order, could be incorrect.", llog::Location());
+        }
+
+        if(static_cast<int>(std::size(prevIdle)) <= thread)
+        {
+            prevIdle.push_back(0);
+            idle.push_back(0);
+            prevUser.push_back(0);
+            user.push_back(0);
+            prevNice.push_back(0);
+            nice.push_back(0);
+            prevSystem.push_back(0);
+            system.push_back(0);
+            prevIoWait.push_back(0);
+            ioWait.push_back(0);
+            prevIrq.push_back(0);
+            irq.push_back(0);
+            prevSoftIrq.push_back(0);
+            softIrq.push_back(0);
+            prevSteal.push_back(0);
+            steal.push_back(0);
+
+        }
+
+        prevIdle.at(thread) = idle.at(thread);
+        prevUser.at(thread) = user.at(thread);
+        prevNice.at(thread) = nice.at(thread);
+        prevSystem.at(thread) = system.at(thread);
+        prevIoWait.at(thread) = ioWait.at(thread);
+        prevIrq.at(thread) = irq.at(thread);
+        prevSoftIrq.at(thread) = softIrq.at(thread);
+        prevSteal.at(thread) = steal.at(thread);
+        std::string cpuName;
+        file >> cpuName;
+
+        file >> user.at(thread);
+        file >> nice.at(thread);
+        file >> system.at(thread);
+        file >> idle.at(thread);
+        file >> ioWait.at(thread);
+        file >> irq.at(thread);
+        file >> softIrq.at(thread);
+        file >> steal.at(thread);
+
+        if (prevIdle.at(thread) == 0)
+        {
+            prevIdle.at(thread) = idle.at(thread);
+            prevUser.at(thread) = user.at(thread);
+            prevNice.at(thread) = nice.at(thread);
+            prevSystem.at(thread) = system.at(thread);
+            prevIoWait.at(thread) = ioWait.at(thread);
+            prevIrq.at(thread) = irq.at(thread);
+            prevSoftIrq.at(thread) = softIrq.at(thread);
+            prevSteal.at(thread) = steal.at(thread);
+            return 0;
+        }
+
+        auto fullPrevIdle = prevIdle.at(thread) + prevIoWait.at(thread);
+        auto fullIdle = idle.at(thread) + ioWait.at(thread);
+
+        auto prevNonIdle = prevUser.at(thread) + prevNice.at(thread) + prevSystem.at(thread) + prevIrq.at(thread) + prevSoftIrq.at(thread) + prevSteal.at(thread);
+        auto nonIdle = user.at(thread) + nice.at(thread) + system.at(thread) + irq.at(thread) + softIrq.at(thread) + steal.at(thread);
+        auto prevTotal = fullPrevIdle + prevNonIdle;
+        auto total = fullIdle + nonIdle;
+
+        auto totaldiff = total - prevTotal;
+        auto idlediff = fullIdle - fullPrevIdle;
+        return static_cast<int>((1000 * static_cast<float>(totaldiff - idlediff) / totaldiff + 1));
     }
 
     std::vector<sensors::Device> GPUinfo()
@@ -244,6 +389,18 @@ namespace sensors
             }
         }
 
+        if (type == Device::Type::CPUThread || type == Device::Type::Any)
+        {
+            auto cpuThreadInfo = CPUThreadinfo();
+            devices.insert(std::end(devices), std::begin(cpuThreadInfo), std::end(cpuThreadInfo));
+
+            if (!cpuThreadInfo.empty())
+            {
+                for(const auto& thread : cpuThreadInfo)
+                getLoad(thread);
+            }
+        }
+
         if (type == Device::Type::GPU || type == Device::Type::Any)
         {
             auto gpuInfo = GPUinfo();
@@ -271,75 +428,19 @@ namespace sensors
         {
             case Device::Type::CPU:
                 {
-                    std::ifstream file(cpuUsageInfo);
-
-                    if (!file)
+                    return CPUload();
+                }
+            case Device::Type::CPUThread:
+                {
+                    auto iter = std::end(device.name) - 1;
+                    std::string threadNumber;
+                    while(*iter != '#')
                     {
-                        llog::Print(llog::pt::error, "Cannot open file", cpuUsageInfo);
+                        threadNumber.insert(0, 1, *iter);
+                        --iter;
                     }
 
-                    static std::size_t prevIdle = 0;
-                    static std::size_t idle = 0;
-                    static std::size_t prevUser = 0;
-                    static std::size_t user = 0;
-                    static std::size_t prevNice = 0;
-                    static std::size_t nice = 0;
-                    static std::size_t prevSystem = 0;
-                    static std::size_t system = 0;
-                    static std::size_t prevIoWait = 0;
-                    static std::size_t ioWait = 0;
-                    static std::size_t prevIrq = 0;
-                    static std::size_t irq = 0;
-                    static std::size_t prevSoftIrq = 0;
-                    static std::size_t softIrq = 0;
-                    static std::size_t prevSteal = 0;
-                    static std::size_t steal = 0;
-
-                    prevIdle = idle;
-                    prevUser = user;
-                    prevNice = nice;
-                    prevSystem = system;
-                    prevIoWait = ioWait;
-                    prevIrq = irq;
-                    prevSoftIrq = softIrq;
-                    prevSteal = steal;
-
-                    std::string cpuName;
-                    file >> cpuName;
-
-                    file >> user;
-                    file >> nice;
-                    file >> system;
-                    file >> idle;
-                    file >> ioWait;
-                    file >> irq;
-                    file >> softIrq;
-                    file >> steal;
-
-                    if (prevIdle == 0)
-                    {
-                        prevIdle = idle;
-                        prevUser = user;
-                        prevNice = nice;
-                        prevSystem = system;
-                        prevIoWait = ioWait;
-                        prevIrq = irq;
-                        prevSoftIrq = softIrq;
-                        prevSteal = steal;
-                        return 0;
-                    }
-
-                    auto fullPrevIdle = prevIdle + prevIoWait;
-                    auto fullIdle = idle + ioWait;
-
-                    auto prevNonIdle = prevUser + prevNice + prevSystem + prevIrq + prevSoftIrq + prevSteal;
-                    auto nonIdle = user + nice + system + irq + softIrq + steal;
-                    auto prevTotal = fullPrevIdle + prevNonIdle;
-                    auto total = fullIdle + nonIdle;
-
-                    auto totaldiff = total - prevTotal;
-                    auto idlediff = fullIdle - fullPrevIdle;
-                    return static_cast<int>((1000 * static_cast<float>(totaldiff - idlediff) / totaldiff + 1));
+                    return CPUload(std::stoi(threadNumber));
                 }
             case Device::Type::GPU:
                 {
@@ -421,6 +522,10 @@ namespace sensors
                     int temp = 0;
                     tempFile >> temp;
                     return temp / 1000;
+                }
+            case Device::Type::CPUThread:
+                {
+                    return error::code;
                 }
             case Device::Type::GPU:
                 {

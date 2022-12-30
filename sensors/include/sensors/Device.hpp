@@ -9,6 +9,7 @@ namespace sensors
         enum class Type
         {
             CPU,
+            CPUThread,
             GPU,
             RAM,
             VRAM,
