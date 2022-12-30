@@ -177,7 +177,7 @@ namespace
         return threads;
     }
 
-    int CPUload(int thread = -1) // -1 is average of all threads
+    int CPUload(int thread = -1)
     {
         std::ifstream file(cpuUsageInfo);
 
@@ -204,13 +204,14 @@ namespace
         static std::vector<std::size_t> prevSteal;
         static std::vector<std::size_t> steal;
 
-        if(thread != -1)
+        // -1 is average of all threads, it gets initialized first in the vector
+        if (thread != -1)
         {
             std::string line;
             std::getline(file, line);
-            while(std::getline(file, line))
+            while (std::getline(file, line))
             {
-                if(line.at(3) - '0' == thread)
+                if (line.at(3) - '0' == thread)
                 {
                     break;
                 }
@@ -218,12 +219,12 @@ namespace
         }
 
         thread += 1;
-        if(static_cast<int>(std::size(prevIdle)) < thread)
+        if (static_cast<int>(std::size(prevIdle)) < thread)
         {
             llog::Print(llog::pt::warning, "Threads initialized in non-sequential order, could be incorrect.", llog::Location());
         }
 
-        if(static_cast<int>(std::size(prevIdle)) <= thread)
+        if (static_cast<int>(std::size(prevIdle)) <= thread)
         {
             prevIdle.push_back(0);
             idle.push_back(0);
@@ -241,7 +242,6 @@ namespace
             softIrq.push_back(0);
             prevSteal.push_back(0);
             steal.push_back(0);
-
         }
 
         prevIdle.at(thread) = idle.at(thread);
@@ -396,8 +396,8 @@ namespace sensors
 
             if (!cpuThreadInfo.empty())
             {
-                for(const auto& thread : cpuThreadInfo)
-                getLoad(thread);
+                for (const auto& thread : cpuThreadInfo)
+                    getLoad(thread);
             }
         }
 
@@ -434,7 +434,7 @@ namespace sensors
                 {
                     auto iter = std::end(device.name) - 1;
                     std::string threadNumber;
-                    while(*iter != '#')
+                    while (*iter != '#')
                     {
                         threadNumber.insert(0, 1, *iter);
                         --iter;
