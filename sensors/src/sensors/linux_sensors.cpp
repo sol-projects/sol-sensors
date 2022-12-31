@@ -187,22 +187,22 @@ namespace
             return sensors::error::code;
         }
 
-        static std::vector<std::size_t> prevIdle;
-        static std::vector<std::size_t> idle;
-        static std::vector<std::size_t> prevUser;
-        static std::vector<std::size_t> user;
-        static std::vector<std::size_t> prevNice;
-        static std::vector<std::size_t> nice;
-        static std::vector<std::size_t> prevSystem;
-        static std::vector<std::size_t> system;
-        static std::vector<std::size_t> prevIoWait;
-        static std::vector<std::size_t> ioWait;
-        static std::vector<std::size_t> prevIrq;
-        static std::vector<std::size_t> irq;
-        static std::vector<std::size_t> prevSoftIrq;
-        static std::vector<std::size_t> softIrq;
-        static std::vector<std::size_t> prevSteal;
-        static std::vector<std::size_t> steal;
+        static std::vector<std::size_t> prevIdle(1, 0);
+        static std::vector<std::size_t> idle(1, 0);
+        static std::vector<std::size_t> prevUser(1, 0);
+        static std::vector<std::size_t> user(1, 0);
+        static std::vector<std::size_t> prevNice(1, 0);
+        static std::vector<std::size_t> nice(1, 0);
+        static std::vector<std::size_t> prevSystem(1, 0);
+        static std::vector<std::size_t> system(1, 0);
+        static std::vector<std::size_t> prevIoWait(1, 0);
+        static std::vector<std::size_t> ioWait(1, 0);
+        static std::vector<std::size_t> prevIrq(1, 0);
+        static std::vector<std::size_t> irq(1, 0);
+        static std::vector<std::size_t> prevSoftIrq(1, 0);
+        static std::vector<std::size_t> softIrq(1, 0);
+        static std::vector<std::size_t> prevSteal(1, 0);
+        static std::vector<std::size_t> steal(1, 0);
 
         // -1 is average of all threads, it gets initialized first in the vector
         if (thread != -1)
@@ -224,7 +224,7 @@ namespace
             llog::Print(llog::pt::warning, "Threads initialized in non-sequential order, could be incorrect.", llog::Location());
         }
 
-        if (static_cast<int>(std::size(prevIdle)) <= thread)
+        if (static_cast<int>(std::size(prevIdle)) <= thread && thread != 0)
         {
             prevIdle.push_back(0);
             idle.push_back(0);
