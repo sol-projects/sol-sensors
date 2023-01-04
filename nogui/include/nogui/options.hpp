@@ -7,6 +7,7 @@ namespace nogui
     struct OptionFlags
     {
         int interval = 0;
+        int accuracy = 0;
         bool temperature = false;
         bool load = false;
         std::string devices;
@@ -64,6 +65,14 @@ namespace nogui
             .access_name = "path",
             .value_name = "path",
             .description = "Set the path for measurement csv files."
+        },
+
+        {
+            .identifier = 'a',
+            .access_letters = "a",
+            .access_name = "accuracy",
+            .value_name = "accuracy",
+            .description = "Set the measurement accuracy (precision) in terms of decimals."
         },
 
         {

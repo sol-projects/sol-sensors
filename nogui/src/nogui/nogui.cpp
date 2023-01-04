@@ -42,7 +42,7 @@ namespace nogui
             return devices;
         }
 
-        void runProgramAtInterval(bool temperature, bool load, int interval, std::vector<sensors::Device> devices, bool fileFlag, const std::string& filepath)
+        void runProgramAtInterval(bool temperature, bool load, int interval, std::vector<sensors::Device> devices, bool fileFlag, const std::string& filepath, int accuracy)
         {
             using namespace std::chrono_literals;
 
@@ -94,12 +94,12 @@ namespace nogui
 
                     if (temperature)
                     {
-                        device.temperature = sensors::getTemp(device);
+                        device.temperature = sensors::getTemp(device, accuracy);
                     }
 
                     if (load)
                     {
-                        device.load = sensors::getLoad(device);
+                        device.load = sensors::getLoad(device, accuracy);
                     }
 
                     if (fileFlag)
@@ -145,6 +145,9 @@ namespace nogui
             auto identifier = cag_option_get(&context);
             switch (identifier)
             {
+                case 'a':
+                    optionFlags.accuracy = std::stoi(cag_option_get_value(&context));
+                    break;
                 case 'i':
                     optionFlags.interval = std::stoi(cag_option_get_value(&context));
                     break;
@@ -171,7 +174,7 @@ namespace nogui
 
         if (optionFlags.interval != 0)
         {
-            runProgramAtInterval(optionFlags.temperature, optionFlags.load, optionFlags.interval, getDevices(optionFlags.devices), optionFlags.file, optionFlags.path);
+            runProgramAtInterval(optionFlags.temperature, optionFlags.load, optionFlags.interval, getDevices(optionFlags.devices), optionFlags.file, optionFlags.path, optionFlags.accuracy);
         }
     }
 }
