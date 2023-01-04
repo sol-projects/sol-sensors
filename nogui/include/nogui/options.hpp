@@ -46,7 +46,7 @@ namespace nogui
             .identifier = 'd',
             .access_letters = "d",
             .access_name = "devices",
-            .value_name = "[cpu|ram|gpu|vram|all]",
+            .value_name = "[cpu|cput|ram|gpu|vram|all]",
             .description = "Choose which device types to measure."
         },
 

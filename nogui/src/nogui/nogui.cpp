@@ -33,6 +33,7 @@ namespace nogui
                 }
             };
 
+            addToDevicesIfExists("cput", sensors::Device::Type::CPUThread);
             addToDevicesIfExists("cpu", sensors::Device::Type::CPU);
             addToDevicesIfExists("vram", sensors::Device::Type::VRAM);
             addToDevicesIfExists("ram", sensors::Device::Type::RAM);
