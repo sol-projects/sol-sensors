@@ -41,21 +41,37 @@ TEST_CASE("Printing current temperature/usage information")
                         else
                         {
                             llog::Print("Temperature:", temp, "Time took:", time.count(), "μs");
+                            auto tempPrecision2 = sensors::getTemp(device, 3);
+                            llog::Print("Temperature with precision 3:", tempPrecision2);
                         }
 
-                        std::this_thread::sleep_for(100ms);
-                        t1 = std::chrono::high_resolution_clock::now();
+                        std::this_thread::sleep_for(150ms);
                         auto load = sensors::getLoad(device);
-                        t2 = std::chrono::high_resolution_clock::now();
-                        time = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1);
                         if (load == sensors::error::code)
                         {
                             llog::Print(llog::pt::warning, "CPU load not supported.");
                         }
                         else
                         {
-                            auto loadf = std::to_string(load);
-                            llog::Print("Load: ", std::string(loadf.substr(0, loadf.size() - 1) + "." + loadf.back() + "%"), "Time took:", time.count(), "μs");
+                            for(int i = 0; i < 2; i ++)
+                            {
+                                std::this_thread::sleep_for(150ms);
+                                t1 = std::chrono::high_resolution_clock::now();
+                                load = sensors::getLoad(device);
+                                t2 = std::chrono::high_resolution_clock::now();
+                                time = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1);
+                                auto loadf = std::to_string(load);
+                                llog::Print("Load (precision 0): ", loadf + "%", "Time took:", time.count(), "μs");
+
+                                std::this_thread::sleep_for(150ms);
+
+                                t1 = std::chrono::high_resolution_clock::now();
+                                load = sensors::getLoad(device, 2);
+                                t2 = std::chrono::high_resolution_clock::now();
+                                time = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1);
+                                loadf = std::to_string(load);
+                                llog::Print("Load (precision 2): ", std::string(loadf.substr(0, loadf.size() - 2) + "." + loadf.substr(loadf.size() - 2, 2) + "%"), "Time took:", time.count(), "μs");
+                            }
                         }
                     }
                     break;
@@ -67,7 +83,7 @@ TEST_CASE("Printing current temperature/usage information")
 
                         std::this_thread::sleep_for(100ms);
                         auto t1 = std::chrono::high_resolution_clock::now();
-                        auto load = sensors::getLoad(device);
+                        auto load = sensors::getLoad(device, 1);
                         auto t2 = std::chrono::high_resolution_clock::now();
                         auto time = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1);
                         if (load == sensors::error::code)
@@ -77,7 +93,7 @@ TEST_CASE("Printing current temperature/usage information")
                         else
                         {
                             auto loadf = std::to_string(load);
-                            llog::Print("Load: ", std::string(loadf.substr(0, loadf.size() - 1) + "." + loadf.back() + "%"), "Time took:", time.count(), "μs");
+                            llog::Print("Load (precision 1): ", std::string(loadf.substr(0, loadf.size() - 1) + "." + loadf.back() + "%"), "Time took:", time.count(), "μs");
                         }
                     }
                     break;
@@ -110,8 +126,25 @@ TEST_CASE("Printing current temperature/usage information")
                         }
                         else
                         {
-                            auto loadf = std::to_string(load);
-                            llog::Print("Load:", std::string(loadf.substr(0, loadf.size() - 1) + "." + loadf.back() + " GB"), "Time took:", time.count(), "μs");
+                            for(int i = 0; i < 2; i ++)
+                            {
+                                std::this_thread::sleep_for(150ms);
+                                t1 = std::chrono::high_resolution_clock::now();
+                                load = sensors::getLoad(device);
+                                t2 = std::chrono::high_resolution_clock::now();
+                                time = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1);
+                                auto loadf = std::to_string(load);
+                                llog::Print("Load (precision 0): ", loadf + " GB", "Time took:", time.count(), "μs");
+
+                                std::this_thread::sleep_for(150ms);
+
+                                t1 = std::chrono::high_resolution_clock::now();
+                                load = sensors::getLoad(device, 2);
+                                t2 = std::chrono::high_resolution_clock::now();
+                                time = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1);
+                                loadf = std::to_string(load);
+                                llog::Print("Load (precision 2): ", std::string(loadf.substr(0, loadf.size() - 2) + "." + loadf.substr(loadf.size() - 2, 2) + " GB"), "Time took:", time.count(), "μs");
+                            }
                         }
                     }
                     break;
@@ -170,7 +203,7 @@ TEST_CASE("Printing current temperature/usage information")
                         }
 
                         t1 = std::chrono::high_resolution_clock::now();
-                        auto load = sensors::getLoad(device);
+                        auto load = sensors::getLoad(device, 2);
                         t2 = std::chrono::high_resolution_clock::now();
                         time = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1);
                         if (load == sensors::error::code)
@@ -180,7 +213,7 @@ TEST_CASE("Printing current temperature/usage information")
                         else
                         {
                             auto loadf = std::to_string(load);
-                            llog::Print("Load:", std::string(loadf.substr(0, loadf.size() - 1) + "." + loadf.back() + " GB"), "Time took:", time.count(), "μs");
+                            llog::Print("Load (precision 2): ", std::string(loadf.substr(0, loadf.size() - 2) + "." + loadf.substr(loadf.size() - 2, 2) + " GB"), "Time took:", time.count(), "μs");
                         }
                     }
                     break;

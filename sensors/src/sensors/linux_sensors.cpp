@@ -1,8 +1,7 @@
-#include "sensors/Device.hpp"
-#include "sensors/sensors.hpp"
-
 #ifdef __linux__
 
+#include "sensors/Device.hpp"
+#include "sensors/sensors.hpp"
 #include "sensors/error.hpp"
 #include <LLOG/llog.hpp>
 #include <chrono>
@@ -10,6 +9,7 @@
 #include <filesystem>
 #include <fstream>
 #include <string>
+#include <cmath>
 
 namespace
 {
@@ -23,7 +23,7 @@ namespace
         std::string fullQuery = "nvidia-smi --query-gpu=" + query + " --format=csv,noheader";
         FILE* pFile = popen(fullQuery.c_str(), "r");
 
-        char buffer[256];
+        char buffer[128];
         char* out = fgets(buffer, sizeof(buffer), pFile);
 
         pclose(pFile);
@@ -177,7 +177,7 @@ namespace
         return threads;
     }
 
-    int CPUload(int thread = -1)
+    int CPUload(int precision, int thread = -1)
     {
         std::ifstream file(cpuUsageInfo);
 
@@ -204,7 +204,7 @@ namespace
         static std::vector<std::size_t> prevSteal;
         static std::vector<std::size_t> steal;
 
-        // -1 is average of all threads, it gets initialized first in the vector
+        // -1 is the average of all threads, it gets initialized first in the vector
         if (thread != -1)
         {
             std::string line;
@@ -287,7 +287,14 @@ namespace
 
         auto totaldiff = total - prevTotal;
         auto idlediff = fullIdle - fullPrevIdle;
-        return static_cast<int>((1000 * static_cast<float>(totaldiff - idlediff) / totaldiff + 1));
+
+        int precisionFactor = 100;
+        for(int i = 0; i < precision; i++)
+        {
+            precisionFactor *= 10;
+        }
+
+        return static_cast<int>((precisionFactor * static_cast<float>(totaldiff - idlediff)) / totaldiff + 1);
     }
 
     std::vector<sensors::Device> GPUinfo()
@@ -422,13 +429,13 @@ namespace sensors
         return devices;
     }
 
-    int getLoad(const Device& device)
+    int getLoad(const Device& device, int precision)
     {
         switch (device.type)
         {
             case Device::Type::CPU:
                 {
-                    return CPUload();
+                    return CPUload(precision);
                 }
             case Device::Type::CPUThread:
                 {
@@ -440,7 +447,7 @@ namespace sensors
                         --iter;
                     }
 
-                    return CPUload(std::stoi(threadNumber));
+                    return CPUload(precision, std::stoi(threadNumber));
                 }
             case Device::Type::GPU:
                 {
@@ -479,14 +486,20 @@ namespace sensors
                     static int totalRam = getRam("MemTotal:");
                     int freeRam = getRam("MemAvailable:");
 
-                    return (totalRam - freeRam) * 0.00001;
+                    auto precisionFactor = 0.000001F;
+                    precisionFactor *= std::pow(10, precision);
+                    return (totalRam - freeRam) * precisionFactor;
                 }
             case Device::Type::VRAM:
                 {
                     if (gpuType == GPUType::Nvidia)
                     {
                         auto memUsedStr = nvidiasmiQuery("memory.used");
-                        return std::stoi(memUsedStr.substr(0, std::size(memUsedStr) - 4)) * 0.01;
+                        auto memUsedMiB = std::stoi(memUsedStr.substr(0, std::size(memUsedStr) - 4));
+                        auto memUsedGB = memUsedMiB * 0.001048576;
+
+                        int precisionFactor = std::pow(10, precision);
+                        return memUsedGB * precisionFactor;
                     }
 
                     return error::code;
@@ -498,7 +511,7 @@ namespace sensors
         return 0;
     }
 
-    int getTemp(const Device& device)
+    int getTemp(const Device& device, int precision)
     {
         switch (device.type)
         {
@@ -521,7 +534,14 @@ namespace sensors
                     tempFile.seekg(0);
                     int temp = 0;
                     tempFile >> temp;
-                    return temp / 1000;
+
+                    int precisionFactor = 1000;
+                    for(int i = 0; i < precision; i++)
+                    {
+                        precisionFactor /= 10;
+                    }
+
+                    return temp / precisionFactor;
                 }
             case Device::Type::CPUThread:
                 {
@@ -531,7 +551,10 @@ namespace sensors
                 {
                     if (gpuType == GPUType::Nvidia)
                     {
-                        return std::stoi(nvidiasmiQuery("temperature.gpu"));
+                        if (auto temp = nvidiasmiQuery("temperature.gpu"); temp != "N/A")
+                        {
+                            return std::stoi(temp);
+                        }
                     }
 
                     break;

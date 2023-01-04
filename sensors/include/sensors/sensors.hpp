@@ -16,7 +16,7 @@ namespace sensors
     VRAM: returns total RAM usagein GB
           precision: xx.x GB
     */
-    int getLoad(const Device& device);
+    int getLoad(const Device& device, int precision = 0);
 
     /*
     CPU: returns temperature in celsius
@@ -27,5 +27,5 @@ namespace sensors
     VRAM: returns temperature in celsius
          precision: xx C
     */
-    int getTemp(const Device& device);
+    int getTemp(const Device& device, int precision = 0);
 }
