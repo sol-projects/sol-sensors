@@ -1,15 +1,15 @@
 #ifdef __linux__
 
 #include "sensors/Device.hpp"
-#include "sensors/sensors.hpp"
 #include "sensors/error.hpp"
+#include "sensors/sensors.hpp"
 #include <LLOG/llog.hpp>
 #include <chrono>
+#include <cmath>
 #include <cstring>
 #include <filesystem>
 #include <fstream>
 #include <string>
-#include <cmath>
 
 namespace
 {
@@ -289,7 +289,7 @@ namespace
         auto idlediff = fullIdle - fullPrevIdle;
 
         int precisionFactor = 100;
-        for(int i = 0; i < precision; i++)
+        for (int i = 0; i < precision; i++)
         {
             precisionFactor *= 10;
         }
@@ -536,7 +536,7 @@ namespace sensors
                     tempFile >> temp;
 
                     int precisionFactor = 1000;
-                    for(int i = 0; i < precision; i++)
+                    for (int i = 0; i < precision; i++)
                     {
                         precisionFactor /= 10;
                     }

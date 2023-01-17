@@ -1,7 +1,7 @@
 #include "nogui/nogui.hpp"
 #include "sensors/sensors.hpp"
-#include "shared/csv/csv.hpp"
 #include "shared/config/config.hpp"
+#include "shared/csv/csv.hpp"
 #include <LLOG/llog.hpp>
 #include <algorithm>
 #include <cctype>
@@ -173,6 +173,9 @@ namespace nogui
                 case 'e':
                     optionFlags.endMeasurement = cag_option_get_value(&context);
                     break;
+                case 'r':
+                    optionFlags.run = true;
+                    break;
                 case 'h':
                     cag_option_print(options, CAG_ARRAY_SIZE(options), stdout);
                     return;
@@ -181,12 +184,40 @@ namespace nogui
 
         if (optionFlags.interval != 0)
         {
-            if(!optionFlags.startMeasurement.empty() && !optionFlags.endMeasurement.empty())
+            if (optionFlags.run)
+            {
+                struct MeasurementInfo
+                {
+                    std::string command;
+                    std::chrono::time_point<std::chrono::system_clock> start;
+                    std::chrono::time_point<std::chrono::system_clock> end;
+                };
+
+                std::vector<MeasurementInfo> measurementInfos;
+
+                std::ifstream file(config::path);
+                std::string line;
+                while (std::getline(file, line))
+                {
+                    MeasurementInfo measurementInfo{};
+
+                    if (line.starts_with("measurement"))
+                    {
+                        for(auto i = line.find(':'); line.at(i) != '\n'; i++)
+                        {
+                            measurementInfo.command += line.at(i);
+                        }
+                    }
+
+                    
+                }
+            }
+            else if (!optionFlags.startMeasurement.empty() && !optionFlags.endMeasurement.empty())
             {
                 std::string args;
-                for(int i = 0; i < argc; i++)
+                for (int i = 0; i < argc; i++)
                 {
-                    if(argv[i][1] == 's' || argv[i][1] == 'e')
+                    if (argv[i][1] == 's' || argv[i][1] == 'e')
                     {
                         continue;
                     }
@@ -202,19 +233,21 @@ namespace nogui
                 std::string lastMeasurement;
 
                 std::string line;
-                while(getline(file, line)) {
-                    if (line.starts_with("measurement")) {
+                while (std::getline(file, line))
+                {
+                    if (line.starts_with("measurement"))
+                    {
                         lastMeasurement = line;
                     }
                 }
 
-                if(!lastMeasurement.empty())
+                if (!lastMeasurement.empty())
                 {
                     lastMeasurement.erase(0, std::string("measurement").size());
                     std::string stringIndex;
-                    for(auto c : lastMeasurement)
+                    for (auto c : lastMeasurement)
                     {
-                        if(c == ':')
+                        if (c == ':')
                         {
                             break;
                         }

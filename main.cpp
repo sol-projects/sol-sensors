@@ -1,5 +1,5 @@
-#include <cstring>
 #include "shared/include/shared/config/config.hpp"
+#include <cstring>
 
 #ifdef NOGUI
 #include "nogui/include/nogui/nogui.hpp"
@@ -22,7 +22,7 @@
 #endif
 int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 {
-    if(config::exists())
+    if (config::exists())
     {
         config::load();
     }

@@ -199,7 +199,7 @@ namespace sensors
         return devices;
     }
 
-    int getLoad(const Device& device,int precision)
+    int getLoad(const Device& device, int precision)
     {
         switch (device.type)
         {
@@ -291,7 +291,7 @@ namespace sensors
         return 0;
     }
 
-    int getTemp(const Device& device,int precision)
+    int getTemp(const Device& device, int precision)
     {
         switch (device.type)
         {

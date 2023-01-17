@@ -53,7 +53,7 @@ TEST_CASE("Printing current temperature/usage information")
                         }
                         else
                         {
-                            for(int i = 0; i < 2; i ++)
+                            for (int i = 0; i < 2; i++)
                             {
                                 std::this_thread::sleep_for(150ms);
                                 t1 = std::chrono::high_resolution_clock::now();
@@ -126,7 +126,7 @@ TEST_CASE("Printing current temperature/usage information")
                         }
                         else
                         {
-                            for(int i = 0; i < 2; i ++)
+                            for (int i = 0; i < 2; i++)
                             {
                                 std::this_thread::sleep_for(150ms);
                                 t1 = std::chrono::high_resolution_clock::now();

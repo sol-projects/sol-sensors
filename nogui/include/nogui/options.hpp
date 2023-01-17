@@ -15,6 +15,7 @@ namespace nogui
         std::string path;
         std::string startMeasurement;
         std::string endMeasurement;
+        bool run = false;
     };
 
     // clang-format off
@@ -91,6 +92,14 @@ namespace nogui
             .access_name = "end_measurement",
             .value_name = "end_measurement",
             .description = "End a timed measurement at a given time."
+        },
+
+        {
+            .identifier = 'r',
+            .access_letters = "r",
+            .access_name = "run",
+            .value_name = nullptr,
+            .description = "Run the program and wait for timed measurements."
         },
 
         {
