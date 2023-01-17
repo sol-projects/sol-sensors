@@ -182,37 +182,60 @@ namespace nogui
             }
         }
 
-        if (optionFlags.interval != 0)
+        if (optionFlags.run)
         {
-            if (optionFlags.run)
+            struct MeasurementInfo
             {
-                struct MeasurementInfo
+                std::string command;
+                std::chrono::time_point<std::chrono::system_clock> start;
+                std::chrono::time_point<std::chrono::system_clock> end;
+            };
+
+            std::vector<MeasurementInfo> measurementInfos;
+
+            std::ifstream file(config::path);
+            std::string line;
+            while (std::getline(file, line))
+            {
+                MeasurementInfo measurementInfo{};
+
+                if (line.starts_with("measurement"))
                 {
-                    std::string command;
-                    std::chrono::time_point<std::chrono::system_clock> start;
-                    std::chrono::time_point<std::chrono::system_clock> end;
-                };
-
-                std::vector<MeasurementInfo> measurementInfos;
-
-                std::ifstream file(config::path);
-                std::string line;
-                while (std::getline(file, line))
-                {
-                    MeasurementInfo measurementInfo{};
-
-                    if (line.starts_with("measurement"))
+                    for(auto i = line.find(':') + 1; i < line.size() && line.at(i) != '\n'; i++)
                     {
-                        for(auto i = line.find(':'); line.at(i) != '\n'; i++)
-                        {
-                            measurementInfo.command += line.at(i);
-                        }
+                        measurementInfo.command += line.at(i);
                     }
 
-                    
+                    auto fromTime = [](const std::string& string)
+                    {
+                      std::string timeString;
+                        for(auto i = string.find(':') + 1; i < string.size() && string.at(i) != '\n'; i++)
+                        {
+                            timeString += string.at(i);
+                        }
+                        std::istringstream ss(timeString);
+
+                    std::tm tm = {};
+                    ss >> std::get_time(&tm, "%Y-%m-%dT%H:%M:%S");
+
+                    return std::chrono::system_clock::from_time_t(std::mktime(&tm));
+                    };
+
+                    std::getline(file, line);
+                    measurementInfo.start = fromTime(line);
+                    std::getline(file, line);
+                    measurementInfo.end = fromTime(line);
+
+                    std::cerr << measurementInfo.command << " " <<
+                        std::chrono::duration_cast<std::chrono::seconds>(measurementInfo.start.time_since_epoch()).count()
+                        << " " << std::chrono::duration_cast<std::chrono::seconds>(measurementInfo.end.time_since_epoch()).count() << " " << std::chrono::time_point_cast<std::chrono::seconds>(std::chrono::system_clock::now()).time_since_epoch().count() << '\n';
                 }
+
             }
-            else if (!optionFlags.startMeasurement.empty() && !optionFlags.endMeasurement.empty())
+        }
+        else if (optionFlags.interval != 0)
+        {
+            if (!optionFlags.startMeasurement.empty() && !optionFlags.endMeasurement.empty())
             {
                 std::string args;
                 for (int i = 0; i < argc; i++)
@@ -228,7 +251,7 @@ namespace nogui
 
                 args.erase(args.size() - 1, 1);
 
-                int index = 0;
+                std::size_t index = 0;
                 std::ifstream file(config::path);
                 std::string lastMeasurement;
 
