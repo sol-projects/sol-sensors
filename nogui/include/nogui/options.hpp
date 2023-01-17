@@ -13,6 +13,8 @@ namespace nogui
         std::string devices;
         bool file = false;
         std::string path;
+        std::string startMeasurement;
+        std::string endMeasurement;
     };
 
     // clang-format off
@@ -73,6 +75,22 @@ namespace nogui
             .access_name = "accuracy",
             .value_name = "accuracy",
             .description = "Set the measurement accuracy (precision) in terms of decimals."
+        },
+
+        {
+            .identifier = 's',
+            .access_letters = "s",
+            .access_name = "start_measurement",
+            .value_name = "start_measurement",
+            .description = "Set a timed measurement that starts measuring at a given time."
+        },
+
+        {
+            .identifier = 'e',
+            .access_letters = "e",
+            .access_name = "end_measurement",
+            .value_name = "end_measurement",
+            .description = "End a timed measurement at a given time."
         },
 
         {

@@ -14,6 +14,7 @@ namespace config
     };
 
     void init();
+    void load();
     void add(const Option& option);
     void set(const std::string& name, const std::string& value);
     void set(const Option& option);
@@ -21,6 +22,7 @@ namespace config
     Option get(const std::string& name);
     void remove(const Option& option);
     bool exists(const std::string& name);
+    bool exists();
     bool saved();
     void save();
     void autosave(bool set);

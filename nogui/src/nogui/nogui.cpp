@@ -1,6 +1,7 @@
 #include "nogui/nogui.hpp"
 #include "sensors/sensors.hpp"
 #include "shared/csv/csv.hpp"
+#include "shared/config/config.hpp"
 #include <LLOG/llog.hpp>
 #include <algorithm>
 #include <cctype>
@@ -166,6 +167,12 @@ namespace nogui
                 case 'p':
                     optionFlags.path = cag_option_get_value(&context);
                     break;
+                case 's':
+                    optionFlags.startMeasurement = cag_option_get_value(&context);
+                    break;
+                case 'e':
+                    optionFlags.endMeasurement = cag_option_get_value(&context);
+                    break;
                 case 'h':
                     cag_option_print(options, CAG_ARRAY_SIZE(options), stdout);
                     return;
@@ -174,7 +181,78 @@ namespace nogui
 
         if (optionFlags.interval != 0)
         {
-            runProgramAtInterval(optionFlags.temperature, optionFlags.load, optionFlags.interval, getDevices(optionFlags.devices), optionFlags.file, optionFlags.path, optionFlags.accuracy);
+            if(!optionFlags.startMeasurement.empty() && !optionFlags.endMeasurement.empty())
+            {
+                std::string args;
+                for(int i = 0; i < argc; i++)
+                {
+                    if(argv[i][1] == 's' || argv[i][1] == 'e')
+                    {
+                        continue;
+                    }
+
+                    args += argv[i];
+                    args += " ";
+                }
+
+                args.erase(args.size() - 1, 1);
+
+                int index = 0;
+                std::ifstream file(config::path);
+                std::string lastMeasurement;
+
+                std::string line;
+                while(getline(file, line)) {
+                    if (line.starts_with("measurement")) {
+                        lastMeasurement = line;
+                    }
+                }
+
+                if(!lastMeasurement.empty())
+                {
+                    lastMeasurement.erase(0, std::string("measurement").size());
+                    std::string stringIndex;
+                    for(auto c : lastMeasurement)
+                    {
+                        if(c == ':')
+                        {
+                            break;
+                        }
+
+                        stringIndex += c;
+                    }
+
+                    index = std::stoi(stringIndex) + 1;
+                }
+
+                config::Option measurement {
+                    .name = "measurement" + std::to_string(index),
+                    .value = args
+                };
+
+                config::Option startMeasurement {
+                    .name = "start_measurement" + std::to_string(index),
+                    .value = optionFlags.startMeasurement
+                };
+
+                config::Option endMeasurement {
+                    .name = "end_measurement" + std::to_string(index),
+                    .value = optionFlags.endMeasurement
+                };
+
+                config::add(measurement);
+                config::set(measurement);
+                config::add(startMeasurement);
+                config::set(startMeasurement);
+                config::add(endMeasurement);
+                config::set(endMeasurement);
+
+                config::save();
+            }
+            else
+            {
+                runProgramAtInterval(optionFlags.temperature, optionFlags.load, optionFlags.interval, getDevices(optionFlags.devices), optionFlags.file, optionFlags.path, optionFlags.accuracy);
+            }
         }
     }
 }

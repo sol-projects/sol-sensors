@@ -26,9 +26,25 @@ namespace config
         };
 
         add(cpuLinuxTempMeasurementMode);
-        set(cpuLinuxTempMeasurementMode);
         add(cpuTempDecPrecision);
+        set(cpuLinuxTempMeasurementMode);
         set(cpuTempDecPrecision);
+
+        save();
+    }
+
+    void load()
+    {
+        std::ifstream file(path);
+
+        if (!file)
+        {
+            llog::Print(llog::pt::error, "Cannot open file:", path);
+        }
+
+        std::ostringstream sstr;
+        sstr << file.rdbuf();
+        configString = sstr.str();
     }
 
     void add(const Option& option)
@@ -103,6 +119,11 @@ namespace config
     bool exists(const std::string& name)
     {
         return configString.find(name) != std::string::npos;
+    }
+
+    bool exists()
+    {
+        return std::filesystem::exists(path);
     }
 
     bool saved()

@@ -1,4 +1,5 @@
 #include <cstring>
+#include "shared/include/shared/config/config.hpp"
 
 #ifdef NOGUI
 #include "nogui/include/nogui/nogui.hpp"
@@ -21,6 +22,15 @@
 #endif
 int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 {
+    if(config::exists())
+    {
+        config::load();
+    }
+    else
+    {
+        config::init();
+    }
+
     if (argc > 1)
     {
         if (!std::strcmp(argv[1], "run_tests"))
