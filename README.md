@@ -5,20 +5,34 @@ SOL Sensors is a collection of programs and libraries for Windows and Linux mean
 The website for this project can be found on sol-projects.github.io/sensors/home.html.
 
 ## Functionality
-- [ ] CPU usage
+### Linux
+- [x] CPU usage
+- [x] CPU temperature
+- [x] CPU Threads usage
+- [x] RAM usage
+- [ ] RAM temperature
+- [x] Nvidia GPU usage
+- [x] Nvidia GPU temperature
+- [x] Nvidia GPU VRAM usage
+- [x] Nvidia GPU VRAM temperature
+- [ ] AMD GPU usage
+- [ ] AMD GPU temperature
+- [ ] AMD GPU VRAM usage
+- [ ] AMD GPU VRAM temperature
+### Windows
+- [x] CPU usage
 - [ ] CPU temperature
-- [ ] CPU Threads usage
-- [ ] RAM usage
-- [x] RAM temperature
-- [ ] Nvidia GPU usage
-- [ ] Nvidia GPU temperature
-- [ ] Nvidia GPU VRAM usage
-- [ ] Nvidia GPU VRAM temperature
-- [x] AMD GPU usage
-- [x] AMD GPU temperature
-- [x] AMD GPU VRAM usage
-- [x] AMD GPU VRAM temperature
-- [x] Comet Haley
+- [x] CPU Threads usage
+- [x] RAM usage
+- [ ] RAM temperature
+- [x] Nvidia GPU usage
+- [x] Nvidia GPU temperature
+- [x] Nvidia GPU VRAM usage
+- [x] Nvidia GPU VRAM temperature
+- [ ] AMD GPU usage
+- [ ] AMD GPU temperature
+- [ ] AMD GPU VRAM usage
+- [ ] AMD GPU VRAM temperature
 
 ## QT Program
 The GUI version of the program displays realtime graphs for hardware components.
