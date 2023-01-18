@@ -19,7 +19,7 @@ TEST_CASE("Printing current temperature/usage information")
         CHECK(!devices.empty());
     }
 
-    // SUBCASE("Checking temperature and load.")
+    SUBCASE("Checking temperature and load.")
     {
         for (auto& device : devices)
         {

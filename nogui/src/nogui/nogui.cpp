@@ -204,11 +204,11 @@ namespace nogui
             std::string line;
             while (std::getline(file, line))
             {
-                MeasurementInfo measurementInfo{};
+                MeasurementInfo measurementInfo {};
 
                 if (line.starts_with("measurement"))
                 {
-                    for(auto i = line.find(':') + 1; i < line.size() && line.at(i) != '\n'; i++)
+                    for (auto i = line.find(':') + 1; i < line.size() && line.at(i) != '\n'; i++)
                     {
                         measurementInfo.command += line.at(i);
                     }
@@ -216,12 +216,12 @@ namespace nogui
                     auto fromTime = [](const std::string& string)
                     {
                         std::string timeString;
-                        for(auto i = string.find(':') + 1; i < string.size() && string.at(i) != '\n'; i++)
+                        for (auto i = string.find(':') + 1; i < string.size() && string.at(i) != '\n'; i++)
                         {
                             timeString += string.at(i);
                         }
-                        std::istringstream ss(timeString);
 
+                        std::istringstream ss(timeString);
                         std::tm tm = {};
                         ss >> std::get_time(&tm, "%Y-%m-%dT%H:%M:%S");
 
@@ -236,32 +236,38 @@ namespace nogui
                 }
 
                 std::sort(std::begin(measurementInfos), std::end(measurementInfos), [](const auto& lhs, const auto& rhs) {
-                        return std::chrono::duration_cast<std::chrono::seconds>(lhs.start.time_since_epoch()).count() < std::chrono::duration_cast<std::chrono::seconds>(rhs.end.time_since_epoch()).count();
+                    return std::chrono::duration_cast<std::chrono::seconds>(lhs.start.time_since_epoch()).count() < std::chrono::duration_cast<std::chrono::seconds>(rhs.end.time_since_epoch()).count();
                 });
 
-                while(!measurementInfos.empty())
+                while (!measurementInfos.empty())
                 {
-                    if(const auto measurementStartTime = std::chrono::duration_cast<std::chrono::seconds>(measurementInfos.at(0).start.time_since_epoch()).count(); measurementStartTime > std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count())
+                    if (const auto measurementStartTime = std::chrono::duration_cast<std::chrono::seconds>(measurementInfos.at(0).start.time_since_epoch()).count(); measurementStartTime > std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count())
                     {
                         continue;
                     }
-else
-{
-std::vector<char*> args;
-std::string arg;
-for(auto c : measurementInfos.at(0).command)
-{
-if(c==' ')
-{
-arg.clear();
-}
-else
-{
-arg += c;
-}
-}
-char* carg = const_cast<char*>(arg.c_str());
-args.push_back(carg);
+                    else
+                    {
+                        std::vector<char*> args;
+                        std::string arg;
+                        for (auto c : measurementInfos.at(0).command)
+                        {
+                            if (c == ' ')
+                            {
+                                char* carg = const_cast<char*>(arg.c_str());
+                                args.push_back(carg);
+                                std::cout << carg;
+                                arg.clear();
+                            }
+                            else
+                            {
+                                arg += c;
+                            }
+                        }
+
+                        char* carg = const_cast<char*>(arg.c_str());
+                        args.push_back(carg);
+                        args.push_back(NULL);
+
                         std::thread runThread([&args]()
                         {
                             auto optionFlags = parse(args.size(), args.data());
