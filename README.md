@@ -36,8 +36,10 @@ The website for this project can be found on sol-projects.github.io/sensors/home
 
 ## QT Program
 The GUI version of the program displays realtime graphs for hardware components.
-To compile and run the QT GUI version of the program, you must have Qt5 or Qt6 installed.
+To compile and run the QT GUI version of the program, you must have Qt5 or Qt6 installed. 
+You can find more information on the [website](https://sol-projects.github.io/sensors/tutorial/gui.html)
 
 ## Console Program
-
+You can find more information on the [website](https://sol-projects.github.io/sensors/tutorial/nogui.html)
 ## Sensors Library
+You can find more information on the [website](https://sol-projects.github.io/sensors/tutorial/sensors.html)
