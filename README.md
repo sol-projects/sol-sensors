@@ -2,7 +2,7 @@
 
 SOL Sensors is a collection of programs and libraries for Windows and Linux meant for fetching information from hardware sensors on Windows and Linux.
 
-The website for this project can be found on sol-projects.github.io/sensors/home.html.
+The website for this project can be found on sol-projects.github.io/sensors/home.html. It hosts tutorials and more information about the project, including how to compile it and include it into your projects.
 
 ## Functionality
 ### Linux
