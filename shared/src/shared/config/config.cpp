@@ -25,10 +25,73 @@ namespace config
             .value = "1"
         };
 
+        Option ramTempDecPrecision {
+            .name = "ram_temperature_decimal_precision",
+            .value = "1"
+        };
+
+        Option gpuTempDecPrecision {
+            .name = "gpu_temperature_decimal_precision",
+            .value = "1"
+        };
+
+        Option vramTempDecPrecision {
+            .name = "vram_temperature_decimal_precision",
+            .value = "1"
+        };
+
+        Option cpuLoadDecPrecision {
+            .name = "cpu_load_decimal_precision",
+            .value = "1"
+        };
+
+        Option ramLoadDecPrecision {
+            .name = "ram_load_decimal_precision",
+            .value = "1"
+        };
+
+        Option gpuLoadDecPrecision {
+            .name = "gpu_load_decimal_precision",
+            .value = "1"
+        };
+
+        Option vramLoadDecPrecision {
+            .name = "vram_load_decimal_precision",
+            .value = "1"
+        };
+
+        Option threadLoadDecPrecision {
+            .name = "thread_load_decimal_precision",
+            .value = "1"
+        };
+
+        Option runOnSystemStartup {
+            .name = "run_on_system_startup",
+            .value = "false"
+        };
+
         add(cpuLinuxTempMeasurementMode);
         add(cpuTempDecPrecision);
+        add(ramTempDecPrecision);
+        add(gpuTempDecPrecision);
+        add(vramTempDecPrecision);
+        add(cpuLoadDecPrecision);
+        add(threadLoadDecPrecision);
+        add(ramLoadDecPrecision);
+        add(gpuLoadDecPrecision);
+        add(vramLoadDecPrecision);
+        add(runOnSystemStartup);
         set(cpuLinuxTempMeasurementMode);
         set(cpuTempDecPrecision);
+        set(ramTempDecPrecision);
+        set(gpuTempDecPrecision);
+        set(vramTempDecPrecision);
+        set(cpuLoadDecPrecision);
+        set(threadLoadDecPrecision);
+        set(ramLoadDecPrecision);
+        set(gpuLoadDecPrecision);
+        set(vramLoadDecPrecision);
+        set(runOnSystemStartup);
 
         save();
     }

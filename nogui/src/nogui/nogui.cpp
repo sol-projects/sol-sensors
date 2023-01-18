@@ -13,7 +13,6 @@ namespace nogui
 {
     namespace
     {
-
         std::vector<sensors::Device> getDevices(std::string& devicesToMeasure)
         {
             std::transform(std::begin(devicesToMeasure), std::end(devicesToMeasure), std::begin(devicesToMeasure), ::tolower);
@@ -134,53 +133,61 @@ namespace nogui
                 std::this_thread::sleep_for(std::chrono::microseconds(interval * 1000 - intervalCycleTime.count()));
             }
         }
+
+        OptionFlags parse(int argc, char* argv[])
+        {
+            OptionFlags optionFlags {};
+
+            cag_option_context context;
+            cag_option_prepare(&context, options, CAG_ARRAY_SIZE(options), argc, argv);
+            while (cag_option_fetch(&context))
+            {
+                auto identifier = cag_option_get(&context);
+                switch (identifier)
+                {
+                    case 'a':
+                        optionFlags.accuracy = std::stoi(cag_option_get_value(&context));
+                        break;
+                    case 'i':
+                        optionFlags.interval = std::stoi(cag_option_get_value(&context));
+                        break;
+                    case 't':
+                        optionFlags.temperature = true;
+                        break;
+                    case 'l':
+                        optionFlags.load = true;
+                        break;
+                    case 'd':
+                        optionFlags.devices = cag_option_get_value(&context);
+                        break;
+                    case 'f':
+                        optionFlags.file = true;
+                        break;
+                    case 'p':
+                        optionFlags.path = cag_option_get_value(&context);
+                        break;
+                    case 's':
+                        optionFlags.startMeasurement = cag_option_get_value(&context);
+                        break;
+                    case 'e':
+                        optionFlags.endMeasurement = cag_option_get_value(&context);
+                        break;
+                    case 'r':
+                        optionFlags.run = true;
+                        break;
+                    case 'h':
+                        cag_option_print(options, CAG_ARRAY_SIZE(options), stdout);
+                        std::exit(1);
+                }
+            }
+
+            return optionFlags;
+        }
     }
 
     void run(int argc, char* argv[])
     {
-        cag_option_context context;
-        OptionFlags optionFlags {};
-        cag_option_prepare(&context, options, CAG_ARRAY_SIZE(options), argc, argv);
-        while (cag_option_fetch(&context))
-        {
-            auto identifier = cag_option_get(&context);
-            switch (identifier)
-            {
-                case 'a':
-                    optionFlags.accuracy = std::stoi(cag_option_get_value(&context));
-                    break;
-                case 'i':
-                    optionFlags.interval = std::stoi(cag_option_get_value(&context));
-                    break;
-                case 't':
-                    optionFlags.temperature = true;
-                    break;
-                case 'l':
-                    optionFlags.load = true;
-                    break;
-                case 'd':
-                    optionFlags.devices = cag_option_get_value(&context);
-                    break;
-                case 'f':
-                    optionFlags.file = true;
-                    break;
-                case 'p':
-                    optionFlags.path = cag_option_get_value(&context);
-                    break;
-                case 's':
-                    optionFlags.startMeasurement = cag_option_get_value(&context);
-                    break;
-                case 'e':
-                    optionFlags.endMeasurement = cag_option_get_value(&context);
-                    break;
-                case 'r':
-                    optionFlags.run = true;
-                    break;
-                case 'h':
-                    cag_option_print(options, CAG_ARRAY_SIZE(options), stdout);
-                    return;
-            }
-        }
+        auto optionFlags = parse(argc, argv);
 
         if (optionFlags.run)
         {
@@ -208,29 +215,63 @@ namespace nogui
 
                     auto fromTime = [](const std::string& string)
                     {
-                      std::string timeString;
+                        std::string timeString;
                         for(auto i = string.find(':') + 1; i < string.size() && string.at(i) != '\n'; i++)
                         {
                             timeString += string.at(i);
                         }
                         std::istringstream ss(timeString);
 
-                    std::tm tm = {};
-                    ss >> std::get_time(&tm, "%Y-%m-%dT%H:%M:%S");
+                        std::tm tm = {};
+                        ss >> std::get_time(&tm, "%Y-%m-%dT%H:%M:%S");
 
-                    return std::chrono::system_clock::from_time_t(std::mktime(&tm));
+                        return std::chrono::system_clock::from_time_t(std::mktime(&tm));
                     };
 
                     std::getline(file, line);
                     measurementInfo.start = fromTime(line);
                     std::getline(file, line);
                     measurementInfo.end = fromTime(line);
-
-                    std::cerr << measurementInfo.command << " " <<
-                        std::chrono::duration_cast<std::chrono::seconds>(measurementInfo.start.time_since_epoch()).count()
-                        << " " << std::chrono::duration_cast<std::chrono::seconds>(measurementInfo.end.time_since_epoch()).count() << " " << std::chrono::time_point_cast<std::chrono::seconds>(std::chrono::system_clock::now()).time_since_epoch().count() << '\n';
+                    measurementInfos.push_back(measurementInfo);
                 }
 
+                std::sort(std::begin(measurementInfos), std::end(measurementInfos), [](const auto& lhs, const auto& rhs) {
+                        return std::chrono::duration_cast<std::chrono::seconds>(lhs.start.time_since_epoch()).count() < std::chrono::duration_cast<std::chrono::seconds>(rhs.end.time_since_epoch()).count();
+                });
+
+                while(!measurementInfos.empty())
+                {
+                    if(const auto measurementStartTime = std::chrono::duration_cast<std::chrono::seconds>(measurementInfos.at(0).start.time_since_epoch()).count(); measurementStartTime > std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count())
+                    {
+                        continue;
+                    }
+else
+{
+std::vector<char*> args;
+std::string arg;
+for(auto c : measurementInfos.at(0).command)
+{
+if(c==' ')
+{
+arg.clear();
+}
+else
+{
+arg += c;
+}
+}
+char* carg = const_cast<char*>(arg.c_str());
+args.push_back(carg);
+                        std::thread runThread([&args]()
+                        {
+                            auto optionFlags = parse(args.size(), args.data());
+                            runProgramAtInterval(optionFlags.temperature, optionFlags.load, optionFlags.interval, getDevices(optionFlags.devices), optionFlags.file, optionFlags.path, optionFlags.accuracy);
+                        });
+
+                        runThread.join();
+                        measurementInfos.erase(std::begin(measurementInfos), std::begin(measurementInfos) + 1);
+                    }
+                }
             }
         }
         else if (optionFlags.interval != 0)

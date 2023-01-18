@@ -55,7 +55,11 @@ add_executable(${PROJECT_NAME}
 )
 
 if(BUILD_NOGUI)
-    target_link_libraries(${PROJECT_NAME} PUBLIC tests nogui gui)
+    if(BUILD_GUI)
+        target_link_libraries(${PROJECT_NAME} PUBLIC tests nogui gui)
+    else()
+        target_link_libraries(${PROJECT_NAME} PUBLIC tests nogui)
+    endif()
 else()
     target_link_libraries(${PROJECT_NAME} PUBLIC tests gui)
 endif()
