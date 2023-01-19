@@ -247,30 +247,34 @@ namespace nogui
                     }
                     else
                     {
-                        std::vector<char*> args;
-                        std::string arg;
+                        std::vector<std::string> sargs;
+                        std::string sarg;
                         for (auto c : measurementInfos.at(0).command)
                         {
                             if (c == ' ')
                             {
-                                char* carg = const_cast<char*>(arg.c_str());
-                                args.push_back(carg);
-                                std::cout << carg;
-                                arg.clear();
+                                sargs.push_back(sarg);
+                                sarg.clear();
                             }
                             else
                             {
-                                arg += c;
+                                sarg += c;
                             }
                         }
 
-                        char* carg = const_cast<char*>(arg.c_str());
-                        args.push_back(carg);
-                        args.push_back(NULL);
+                        sargs.push_back(sarg.data());
+
+                        std::vector<char*> args;
+                        for(int i = 0; i < sargs.size(); i++)
+                        {
+                            args.push_back(sargs.at(i).data());
+                        }
+                        args.push_back(nullptr);
 
                         std::thread runThread([&args]()
                         {
-                            auto optionFlags = parse(args.size(), args.data());
+                            auto optionFlags = parse(args.size(), &args[0]);
+                            std::cout << optionFlags.devices;
                             runProgramAtInterval(optionFlags.temperature, optionFlags.load, optionFlags.interval, getDevices(optionFlags.devices), optionFlags.file, optionFlags.path, optionFlags.accuracy);
                         });
 
