@@ -24,10 +24,10 @@ TEST_CASE("Testing saving and reading from a file.")
             cpuCsv.add(cpu);
         }
 
-        auto loads = cpuCsv.getLastnData(10, 1);
+        auto loads = cpuCsv.getLastnData(30, 1);
         auto temps = cpuCsv.getLastnData(10, 2);
         std::cout << std::endl;
-        llog::Print("Reading loads and temps from csv file.");
+        llog::Print("Reading CPU loads and temps from csv file:");
         llog::Print(loads);
         llog::Print(temps);
         std::cout << std::endl;

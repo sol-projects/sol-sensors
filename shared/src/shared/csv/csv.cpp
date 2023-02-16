@@ -97,17 +97,16 @@ namespace csv
 
         file.seekg(0, std::ios_base::end);
         std::string line;
-        for (int i = 0; i < n; i++)
+        for (int i = 0; i < n - 1; i++)
         {
             char c = 0;
             while (c != '\n')
             {
                 file.seekg(-2, std::ios_base::cur);
 
-                if (static_cast<int>(file.tellg()) <= 1)
+                if (static_cast<int>(file.tellg()) < 2)
                 {
-                    file.seekg(0);
-                    break;
+                    return data;
                 }
 
                 file.get(c);
