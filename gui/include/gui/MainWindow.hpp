@@ -5,7 +5,9 @@
 #include <QMainWindow>
 #include <QWidget>
 #include <QWidgetData>
-
+#include <thread>
+#include <vector>
+#include "sensors/sensors.hpp"
 QT_BEGIN_NAMESPACE
 namespace Ui
 {
@@ -25,15 +27,24 @@ private slots:
     void on_actionSave_triggered();
     void timerSlot();
     void on_actionSettings_triggered();
+    void on_actionPause_triggered();
+    void on_actionResume_triggered();
+
 
 private:
     Ui::MainWindow* ui;
     QWidget* widget;
     MyDialog* mDialog;
-    QCustomPlot* mPlot;
-    QPointer<QCPGraph> mGraph1;
-    QPointer<QCPGraph> mGraph2;
-    AxisTag* mTag1;
-    AxisTag* mTag2;
+    std::vector<QCustomPlot*> mPlots;
+    std::vector<QPointer<QCPGraph>> mGraphs;
+    std::vector<AxisTag*> mTags;
     QTimer mDataTimer;
+    QVector<bool> mPauseStatus;
+    std::vector<sensors::Device> devices;
+    int measurementTime = 100;
+
+    void setupGraph(QCustomPlot* customPlot);
+    QCustomPlot* createCustomPlot();
+
 };
+

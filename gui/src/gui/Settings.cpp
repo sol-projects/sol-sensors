@@ -1,5 +1,6 @@
 #include "gui/Settings.hpp"
 #include "gui/ui_settings.h"
+#include "gui/MainWindow.hpp"
 
 MyDialog::MyDialog(QWidget* parent)
     : QDialog(parent)
