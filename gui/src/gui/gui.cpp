@@ -11,9 +11,9 @@ namespace gui
         MainWindow mainWindow;
 
         QScrollArea* scrollArea = new QScrollArea;
-        scrollArea->setWidgetResizable(true); // Allow the scroll area to resize its contents
+        scrollArea->setWidgetResizable(true);
         scrollArea->setWidget(&mainWindow);
-        scrollArea->setStyleSheet("QScrollArea { border: none; }"); // Remove the border around the scroll area
+        scrollArea->setStyleSheet("QScrollArea { border: none; }");
 
         scrollArea->show();
 

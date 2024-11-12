@@ -6,12 +6,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>920</width>
-    <height>720</height>
+    <width>1920</width>
+    <height>1080</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string notr="true">SOL temps</string>
+   <string notr="true">Sensors</string>
   </property>
   <widget class="QWidget" name="centralwidget"/>
   <widget class="QMenuBar" name="menubar">
@@ -19,58 +19,19 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>920</width>
-     <height>31</height>
+     <width>1920</width>
+     <height>1080</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuSOL_temps">
     <property name="title">
      <string>File</string>
     </property>
-    <addaction name="separator"/>
-    <addaction name="saveButton"/>
-    <addaction name="loadButton"/>
-    <addaction name="actionSettings"/>
-    <addaction name="actionPause"/>
-    <addaction name="actionResume"/>
    </widget>
    <addaction name="menuSOL_temps"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
-  <action name="saveButton">
-   <property name="text">
-    <string>Save</string>
-   </property>
-  </action>
-  <action name="loadButton">
-   <property name="text">
-    <string>Load from File</string>
-   </property>
-  </action>
-  <action name="actionSettings">
-   <property name="text">
-    <string>Settings</string>
-   </property>
-  </action>
-  <action name="actionPause">
-   <property name="text">
-    <string>Pause</string>
-   </property>
-  </action>
-  <action name="actionResume">
-   <property name="text">
-    <string>Resume</string>
-   </property>
-  </action>
+
  </widget>
  <resources/>
- <connections>
-  <connection>
-   <sender>loadButton</sender>
-   <signal>triggered()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>loadGraphsFromFile()</slot>
-  </connection>
- </connections>
 </ui>
-

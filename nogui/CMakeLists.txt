@@ -12,7 +12,6 @@ FetchContent_Declare(
     cargs
     GIT_REPOSITORY https://github.com/likle/cargs.git
     GIT_TAG stable
-    SOURCE_DIR CARGS
 )
 
 FetchContent_MakeAvailable(cargs)

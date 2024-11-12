@@ -29,12 +29,9 @@ set(CMAKE_AUTORCC ON)
 add_library(gui
     src/gui/gui.cpp
     src/gui/MainWindow.cpp
-    src/gui/Settings.cpp
-    src/gui/settings.ui
-    src/gui/mainwindow.ui
     src/gui/AxisTag.cpp
+    src/gui/mainwindow.ui
     ../libraries/QCUSTOMPLOT/qcustomplot-source/qcustomplot.cpp
-    include/gui/Settings.hpp
     include/gui/MainWindow.hpp
     include/gui/AxisTag.hpp
     ../libraries/QCUSTOMPLOT/qcustomplot-source/qcustomplot.h
