@@ -20,6 +20,21 @@ The website for this project can be found on sol-projects.github.io/sensors/home
 - [ ] AMD GPU VRAM usage
 - [ ] AMD GPU VRAM temperature
 
+### MacOS
+- [x] CPU usage
+- [x] CPU temperature
+- [x] CPU Threads usage
+- [x] RAM usage
+- [ ] RAM temperature
+- [ ] Nvidia GPU usage
+- [ ] Nvidia GPU temperature
+- [ ] Nvidia GPU VRAM usage
+- [ ] Nvidia GPU VRAM temperature
+- [ ] AMD GPU usage
+- [ ] AMD GPU temperature
+- [ ] AMD GPU VRAM usage
+- [ ] AMD GPU VRAM temperature
+
 ## QT Program
 The GUI version of the program displays realtime graphs for hardware components.
 To compile and run the QT GUI version of the program, you must have Qt5 or Qt6 installed. 
