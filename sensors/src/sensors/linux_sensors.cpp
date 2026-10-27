@@ -16,8 +16,10 @@ namespace
     const std::filesystem::path raminfo = "/proc/meminfo";
     const std::filesystem::path cpuUsageInfo = "/proc/stat";
     const std::filesystem::path tempPath = "/sys/class/thermal";
+    const std::filesystem::path tempPathAmd = "/sys/class/hwmon/hwmon4/temp1_input";
     const std::filesystem::path nvidiaDir = "/proc/driver/nvidia/gpus/";
-
+    const std::filesystem::path diskInfo = "/sys/block/"; //TODO add disk devices optional get disk power usage, size and name  
+    
     std::string nvidiasmiQuery(const std::string& query)
     {
         std::string fullQuery = "nvidia-smi --query-gpu=" + query + " --format=csv,noheader";
@@ -89,7 +91,7 @@ namespace
     {
         for (const auto& thermalPath : std::filesystem::directory_iterator { tempPath })
         {
-            if (thermalPath.path().generic_string().starts_with("/sys/class/thermal/thermal_zone"))
+            if (thermalPath.path().generic_string().starts_with("/sys/class/thermal/thermal_zone")) // Intel
             {
                 std::ifstream file(thermalPath.path() / "type");
 
@@ -107,12 +109,20 @@ namespace
                     {
                         return thermalPath.path() / "temp";
                     }
+                    
                 }
+
                 else
                 {
                     llog::Print(llog::pt::error, "Cannot open file at:", llog::Location());
                 }
+            }   
+
+            else
+            {
+                return tempPathAmd;
             }
+
         }
 
         llog::Print(llog::pt::error, "Cannot find CPU temperature file path");
@@ -519,7 +529,7 @@ namespace sensors
                 {
                     const std::string cpuTempPath = findCpuTempPath();
                     if (cpuTempPath.empty())
-                    {
+                    { 
                         return error::code;
                     }
 
