@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <meta name="theme-color" content="#1a1a1a">
+  <title>System Monitor</title>
+  <script src="https://cdn.jsdelivr.net/npm/uplot@1.6.31/dist/uPlot.iife.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/uplot@1.6.31/dist/uPlot.min.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header id="header">
+    <div class="header-main">
+      <h1>System Monitor</h1>
+      <div id="liveBadge" class="live">
+        <span class="dot"></span><span class="label">LIVE</span>
+      </div>
+
+      <div id="toolbar">
+        <select id="windowSelect" title="Visible window"></select>
+        <button id="densityBtn" class="tb-btn" title="Toggle density">⊞</button>
+        <button id="emaBtn" class="tb-btn" title="Exponential moving average">EMA</button>
+        <button id="yAutoBtn" class="tb-btn" title="Auto Y-scale">Y</button>
+        <button id="hoverBtn" class="tb-btn active" title="Toggle hover / tooltip">HOV</button>
+        <button id="alertBtn" class="tb-btn alert-btn" title="Alerts">
+          ⚠<span id="alertCount">0</span>
+        </button>
+        <div class="menu-wrap">
+          <button id="moreBtn" class="tb-btn" title="More">⋯</button>
+          <div id="moreMenu" class="menu hidden">
+            <button id="saveBtn" class="menu-item">Save snapshot</button>
+            <button id="replayBtn" class="menu-item">Load replay…</button>
+            <button id="compareBtn" class="menu-item">Load compare…</button>
+          </div>
+        </div>
+      </div>
+
+      <input type="text" id="filterInput" placeholder="Filter…" autocomplete="off">
+    </div>
+
+    <div class="header-sub">
+      <span id="status">connecting…</span>
+      <span id="statusInfo"></span>
+    </div>
+  </header>
+
+  <input type="file" id="replayFileInput" accept=".json" style="display:none">
+  <input type="file" id="compareFileInput" accept=".json" style="display:none">
+
+  <div id="scrollbar">
+    <span class="lbl">old</span>
+    <input type="range" id="timeScroll" min="0" max="1000" value="1000" step="1">
+    <span class="lbl">live</span>
+  </div>
+
+  <div id="replayBar" class="hidden">
+    <button id="replayPlay" class="tb-btn">▶</button>
+    <input type="range" id="replayScrub" min="0" max="100" value="0" step="1">
+    <span id="replayTime">0:00 / 0:00</span>
+    <select id="replaySpeed" class="tb-sel">
+      <option value="0.5">0.5×</option>
+      <option value="1" selected>1×</option>
+      <option value="2">2×</option>
+      <option value="4">4×</option>
+    </select>
+    <button id="replayExit" class="tb-btn">Exit</button>
+    <span id="replayFilename" class="filename"></span>
+  </div>
+
+  <div id="compareBar" class="hidden">
+    <span class="cmp-label">Comparing: <span id="compareFilename" class="filename"></span></span>
+    <label class="tb-label">Δ <input type="range" id="compareOffset" min="-300" max="300" value="30" step="1"></label>
+    <span id="compareOffsetVal">30s</span>
+    <button id="compareExit" class="tb-btn">Stop</button>
+  </div>
+
+  <div id="panels"></div>
+  <div id="tooltip" class="tooltip"></div>
+
+  <div id="alertPanel" class="hidden">
+    <div class="alert-header">
+      <span class="alert-title">Alerts</span>
+      <label class="tb-label">Sensitivity
+        <select id="alertSensitivity" class="tb-sel">
+          <option value="1">Instant</option>
+          <option value="3">High</option>
+          <option value="5" selected>Medium</option>
+          <option value="10">Low</option>
+          <option value="30">Very low</option>
+        </select>
+      </label>
+      <label class="tb-label">Level
+        <select id="alertLevel" class="tb-sel">
+          <option value="warn" selected>Warn + Crit</option>
+          <option value="crit">Crit only</option>
+        </select>
+      </label>
+      <button id="alertClear" class="tb-btn">Clear</button>
+      <button id="alertClose" class="tb-btn">✕</button>
+    </div>
+    <div id="alertList"></div>
+  </div>
+
+  <script src="config.js"></script>
+  <script src="state.js"></script>
+  <script src="utils.js"></script>
+  <script src="api.js"></script>
+  <script src="tooltip.js"></script>
+  <script src="chart.js"></script>
+  <script src="panels.js"></script>
+  <script src="scrollbar.js"></script>
+  <script src="alerts.js"></script>
+  <script src="controls.js"></script>
+  <script src="keyboard.js"></script>
+  <script src="snapshot.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>

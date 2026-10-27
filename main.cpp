@@ -9,6 +9,10 @@
 #endif
 #endif
 
+#ifdef SERVER
+#include "server/include/server/server.hpp"
+#endif
+
 #ifdef TESTS
 #include "tests/config.hpp"
 #include "tests/csv.hpp"
@@ -62,6 +66,8 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
     {
 #ifdef GUI
         gui::run(argc, argv);
+#elifdef SERVER
+	server::serve();
 #else
         return EXIT_FAILURE;
 #endif

@@ -16,6 +16,7 @@ Makefile
 
 # Config
 compile_commands.json
+config.conf
 
 # Prerequisites
 *.d

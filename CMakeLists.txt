@@ -8,8 +8,9 @@ project(SOL_SENSORS
 option(BUILD_GUI "BUILD_GUI" ON)
 option(BUILD_NOGUI "BUILD_NOGUI" ON)
 option(BUILD_TESTS "BUILD_TESTS" ON)
+option(BUILD_SERVER "BUILD_SERVER" ON)
 
-if(BUILD_TESTS OR BUILD_GUI OR BUILD_NOGUI)
+if(BUILD_TESTS OR BUILD_GUI OR BUILD_NOGUI OR BUILD_SERVER)
     include(FetchContent)
     find_package(Git REQUIRED)
 endif()
@@ -27,7 +28,7 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     add_compile_options(/W4 /WX)
 endif()
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
@@ -44,6 +45,11 @@ if(BUILD_GUI)
     add_definitions(-DGUI)
     add_subdirectory(gui)
 endif(BUILD_GUI)
+
+if(BUILD_SERVER)
+    add_definitions(-DSERVER)
+    add_subdirectory(server)
+endif(BUILD_SERVER)
 
 if(BUILD_NOGUI)
     add_definitions(-DNOGUI)
@@ -72,6 +78,10 @@ elseif(BUILD_GUI)
     else()
         target_link_libraries(${PROJECT_NAME} PUBLIC gui)
     endif()
+endif()
+
+if(BUILD_SERVER)
+    target_link_libraries(${PROJECT_NAME} PUBLIC server nogui)
 endif()
 
 file(DOWNLOAD
