@@ -36,7 +36,7 @@ namespace csv
             std::filesystem::create_directory(path);
         }
 
-        std::ofstream file(m_fileName);
+        std::ofstream file(m_fileName, std::ios::binary);
 
         if (!file)
         {
@@ -59,7 +59,7 @@ namespace csv
 
     void Csv::add(const sensors::Device& device)
     {
-        std::ofstream file(m_fileName, std::ios_base::app);
+        std::ofstream file(m_fileName, std::ios_base::app | std::ios::binary);
 
         if (m_measurementType == MeasurementType::Both)
         {
@@ -90,7 +90,7 @@ namespace csv
             return {};
         }
 
-        std::ifstream file(m_fileName);
+        std::ifstream file(m_fileName, std::ios::binary);
 
         std::vector<int> data;
         data.reserve(n);

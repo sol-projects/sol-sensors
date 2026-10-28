@@ -36,7 +36,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
         if (!std::strcmp(argv[1], "run_tests"))
         {
 #ifdef TESTS
-            doctest::Context doctestContext;
+            doctest::Context doctestContext(argc - 1, argv + 1);
             int result = doctestContext.run();
 
             if (doctestContext.shouldExit())

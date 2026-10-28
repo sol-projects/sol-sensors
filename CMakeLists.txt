@@ -17,14 +17,15 @@ endif()
 add_compile_definitions(LLOG_ENABLED LLOG_COLORS_ENABLED)
 
 if(BUILD_TESTS)
-    add_compile_definitions(DOCTEST_CONFIG_IMPLEMENT)
+    add_compile_definitions(DOCTEST_CONFIG_IMPLEMENT DOCTEST_COUNTER=__COUNTER__)
+    enable_testing()
 endif()
 
-if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR "clang")
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     add_compile_options(-Wall -Wextra -Wpedantic -O2)
 endif()
 if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    add_compile_options(/W4 /WX)
+    add_compile_options(/W4 /utf-8)
 endif()
 
 set(CMAKE_CXX_STANDARD 20)
@@ -53,6 +54,20 @@ endif(BUILD_NOGUI)
 add_executable(${PROJECT_NAME}
     main.cpp
 )
+
+target_link_libraries(${PROJECT_NAME} PRIVATE shared)
+
+if(BUILD_TESTS)
+    target_link_libraries(${PROJECT_NAME} PRIVATE tests)
+    # The legacy console test calls exit(); check CLI help in a separate process.
+    add_test(NAME sensors_tests COMMAND ${PROJECT_NAME} run_tests "--test-case-exclude=Testing the console application.")
+    file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/test-work)
+    set_tests_properties(sensors_tests PROPERTIES WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/test-work)
+    if(BUILD_NOGUI)
+        add_test(NAME console_help COMMAND ${PROJECT_NAME} -h)
+        set_tests_properties(console_help PROPERTIES WILL_FAIL TRUE WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/test-work)
+    endif()
+endif()
 
 if(BUILD_NOGUI)
     if(BUILD_GUI)

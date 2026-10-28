@@ -16,3 +16,8 @@ file(DOWNLOAD
 )
 
 target_compile_features(sensors PUBLIC cxx_std_20)
+
+if(WIN32)
+    target_compile_definitions(sensors PRIVATE NOMINMAX WIN32_LEAN_AND_MEAN)
+    target_link_libraries(sensors PRIVATE pdh dxgi gdi32 advapi32)
+endif()

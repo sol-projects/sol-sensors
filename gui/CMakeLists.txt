@@ -1,9 +1,10 @@
-if(Qt6_FOUND)
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core Widgets PrintSupport)
+if(QT_VERSION_MAJOR EQUAL 6)
     find_package(Qt6 COMPONENTS Core Widgets PrintSupport REQUIRED)
     message("-- Using Qt6")
 endif()
 
-if(NOT Qt6_FOUND)
+if(QT_VERSION_MAJOR EQUAL 5)
     find_package(Qt5 COMPONENTS Core Widgets PrintSupport REQUIRED)
     message("-- Using Qt5")
 endif()
@@ -43,3 +44,15 @@ target_include_directories(gui PUBLIC
 )
 
 target_link_libraries(gui PUBLIC sensors Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::PrintSupport)
+
+if(BUILD_TESTS)
+    add_executable(dashboard_check ../tests/dashboard.cpp)
+    target_link_libraries(dashboard_check PRIVATE gui)
+    add_test(NAME dashboard_controls COMMAND ${CMAKE_COMMAND} -E env QT_QPA_PLATFORM=offscreen $<TARGET_FILE:dashboard_check>)
+
+    add_executable(dashboard_live_check ../tests/dashboard.cpp)
+    target_compile_definitions(dashboard_live_check PRIVATE LIVE_SENSORS)
+    target_link_libraries(dashboard_live_check PRIVATE gui)
+    add_test(NAME dashboard_live COMMAND ${CMAKE_COMMAND} -E env QT_QPA_PLATFORM=offscreen
+        $<TARGET_FILE:dashboard_live_check> ${CMAKE_BINARY_DIR}/dashboard.png ${CMAKE_BINARY_DIR}/dashboard-narrow.png ${CMAKE_BINARY_DIR}/dashboard-full.png)
+endif()

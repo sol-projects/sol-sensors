@@ -10,6 +10,7 @@ target_include_directories(nogui PUBLIC
 
 FetchContent_Declare(
     cargs
+    BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/cargs
     GIT_REPOSITORY https://github.com/likle/cargs.git
     GIT_TAG stable
 )

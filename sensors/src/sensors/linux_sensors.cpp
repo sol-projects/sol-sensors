@@ -10,6 +10,10 @@
 #include <filesystem>
 #include <fstream>
 #include <string>
+#include <algorithm>
+#include <limits>
+#include <sstream>
+#include <unordered_map>
 
 namespace
 {
@@ -18,37 +22,117 @@ namespace
     const std::filesystem::path tempPath = "/sys/class/thermal";
     const std::filesystem::path nvidiaDir = "/proc/driver/nvidia/gpus/";
 
-    std::string nvidiasmiQuery(const std::string& query)
+    std::unordered_map<std::string, std::filesystem::path> amdPaths;
+    std::unordered_map<std::string, std::string> nvidiaIds;
+
+    int scaledValue(double value, int precision)
     {
-        std::string fullQuery = "nvidia-smi --query-gpu=" + query + " --format=csv,noheader";
-        FILE* pFile = popen(fullQuery.c_str(), "r");
-
-        char buffer[128];
-        char* out = fgets(buffer, sizeof(buffer), pFile);
-
-        pclose(pFile);
-        return std::string(out, out + std::strlen(out) - 1);
-    }
-
-    enum class GPUType
-    {
-        Nvidia,
-        Amd,
-        Intel,
-        Unknown
-    };
-
-    GPUType findGpuType()
-    {
-        if (std::filesystem::is_directory(nvidiaDir))
+        value *= std::pow(10, precision);
+        if (!std::isfinite(value) || value < 0 || value > std::numeric_limits<int>::max())
         {
-            return GPUType::Nvidia;
+            return sensors::error::code;
         }
-
-        return GPUType::Unknown;
+        return static_cast<int>(value);
     }
 
-    const auto gpuType = findGpuType();
+    int fileValue(const std::filesystem::path& path, double divisor, int precision)
+    {
+        std::ifstream file(path);
+        double value;
+        return file >> value ? scaledValue(value / divisor, precision) : sensors::error::code;
+    }
+
+    std::string nvidiasmiQuery(const std::string& query, const std::string& id)
+    {
+        std::string fullQuery = "nvidia-smi -i " + id + " --query-gpu=" + query + " --format=csv,noheader,nounits 2>/dev/null";
+        FILE* pFile = popen(fullQuery.c_str(), "r");
+        if (!pFile)
+        {
+            return {};
+        }
+        char buffer[256];
+        std::string result;
+        if (fgets(buffer, sizeof(buffer), pFile))
+        {
+            result = buffer;
+            result.erase(result.find_last_not_of("\r\n") + 1);
+        }
+        return pclose(pFile) == 0 ? result : std::string {};
+    }
+
+    int nvidiaValue(const sensors::Device& device, const std::string& query, double divisor, int precision)
+    {
+        auto found = nvidiaIds.find(device.name);
+        if (found == nvidiaIds.end())
+        {
+            return sensors::error::code;
+        }
+        std::istringstream value(nvidiasmiQuery(query, found->second));
+        double number;
+        return value >> number ? scaledValue(number / divisor, precision) : sensors::error::code;
+    }
+
+    std::vector<sensors::Device> AMDinfo(const std::filesystem::path& root = "/sys/class/drm")
+    {
+        std::vector<sensors::Device> devices;
+        std::error_code error;
+        for (std::filesystem::directory_iterator it(root, error), end; !error && it != end; it.increment(error))
+        {
+            auto card = it->path().filename().string();
+            if (!card.starts_with("card") || card.find_first_not_of("0123456789", 4) != std::string::npos || card.size() == 4)
+            {
+                continue;
+            }
+            auto path = it->path() / "device";
+            std::ifstream vendorFile(path / "vendor");
+            std::string vendor;
+            vendorFile >> vendor;
+            if (vendor != "0x1002")
+            {
+                continue;
+            }
+            std::ifstream nameFile(path / "product_name");
+            std::string name;
+            std::getline(nameFile, name);
+            if (name.empty())
+            {
+                name = "AMD GPU";
+            }
+            name += " (" + card + ")";
+            amdPaths[name] = path;
+            amdPaths[name + " VRAM"] = path;
+            devices.push_back({ sensors::Device::generateID(), name, sensors::Device::Type::GPU, 0, 0 });
+        }
+        return devices;
+    }
+
+    int AMDtemp(const std::filesystem::path& path, bool memory, int precision)
+    {
+        std::error_code error;
+        for (std::filesystem::directory_iterator it(path / "hwmon", error), end; !error && it != end; it.increment(error))
+        {
+            if (!memory)
+            {
+                return fileValue(it->path() / "temp1_input", 1000, precision);
+            }
+            for (std::filesystem::directory_iterator sensor(it->path(), error), sensorEnd; !error && sensor != sensorEnd; sensor.increment(error))
+            {
+                auto name = sensor->path().filename().string();
+                if (!name.starts_with("temp") || !name.ends_with("_label"))
+                {
+                    continue;
+                }
+                std::ifstream labelFile(sensor->path());
+                std::string label;
+                std::getline(labelFile, label);
+                if (label == "mem" || label == "memory")
+                {
+                    return fileValue(it->path() / (name.substr(0, name.size() - 6) + "_input"), 1000, precision);
+                }
+            }
+        }
+        return sensors::error::code;
+    }
 
     [[maybe_unused]] int findNumCpuCores()
     {
@@ -112,6 +196,18 @@ namespace
                 {
                     llog::Print(llog::pt::error, "Cannot open file at:", llog::Location());
                 }
+            }
+        }
+
+        std::error_code error;
+        for (std::filesystem::directory_iterator it("/sys/class/hwmon", error), end; !error && it != end; it.increment(error))
+        {
+            std::ifstream file(it->path() / "name");
+            std::string name;
+            file >> name;
+            if (name == "k10temp" || name == "coretemp")
+            {
+                return it->path() / "temp1_input";
             }
         }
 
@@ -208,13 +304,9 @@ namespace
         if (thread != -1)
         {
             std::string line;
-            std::getline(file, line);
-            while (std::getline(file, line))
+            for (int i = 0; i <= thread; i++)
             {
-                if (line.at(3) - '0' == thread)
-                {
-                    break;
-                }
+                std::getline(file, line);
             }
         }
 
@@ -294,14 +386,14 @@ namespace
             precisionFactor *= 10;
         }
 
-        return static_cast<int>((precisionFactor * static_cast<float>(totaldiff - idlediff)) / totaldiff + 1);
+        return totaldiff ? static_cast<int>((precisionFactor * static_cast<double>(totaldiff - idlediff)) / totaldiff) : 0;
     }
 
     std::vector<sensors::Device> GPUinfo()
     {
         std::vector<sensors::Device> gpus;
 
-        if (gpuType == GPUType::Nvidia)
+        if (std::filesystem::is_directory(nvidiaDir))
         {
             for (const auto& gpuPath : std::filesystem::directory_iterator { nvidiaDir })
             {
@@ -318,16 +410,18 @@ namespace
                             name.erase(0, 1);
                         }
 
+                        if (std::any_of(gpus.begin(), gpus.end(), [&name](const auto& gpu) { return gpu.name == name; }))
+                        {
+                            name += " (" + gpuPath.path().filename().string() + ")";
+                        }
+                        nvidiaIds[name] = gpuPath.path().filename().string();
                         gpus.push_back({ sensors::Device::generateID(), name, sensors::Device::Type::GPU, 0, 0 });
                     }
                 }
             }
         }
-        else
-        {
-            // amd
-        }
-
+        auto amdGpus = AMDinfo();
+        gpus.insert(gpus.end(), amdGpus.begin(), amdGpus.end());
         return gpus;
     }
 
@@ -370,9 +464,14 @@ namespace
     std::vector<sensors::Device> VRAMinfo()
     {
         std::vector<sensors::Device> vrams;
-        if (gpuType == GPUType::Nvidia)
+        for (const auto& gpu : GPUinfo())
         {
-            vrams.push_back({ sensors::Device::generateID(), nvidiasmiQuery("name") + " " + nvidiasmiQuery("memory.total") + " VRAM", sensors::Device::Type::VRAM, 0, 0 });
+            auto name = gpu.name + " VRAM";
+            if (auto found = nvidiaIds.find(gpu.name); found != nvidiaIds.end())
+            {
+                nvidiaIds[name] = found->second;
+            }
+            vrams.push_back({ sensors::Device::generateID(), name, sensors::Device::Type::VRAM, 0, 0 });
         }
 
         return vrams;
@@ -431,6 +530,14 @@ namespace sensors
 
     int getLoad(const Device& device, int precision)
     {
+        if (precision < 0 || precision > 6)
+        {
+            return error::code;
+        }
+        if (auto found = amdPaths.find(device.name); found != amdPaths.end())
+        {
+            return fileValue(found->second / (device.type == Device::Type::VRAM ? "mem_info_vram_used" : "gpu_busy_percent"), device.type == Device::Type::VRAM ? 1e9 : 1, precision);
+        }
         switch (device.type)
         {
             case Device::Type::CPU:
@@ -451,12 +558,7 @@ namespace sensors
                 }
             case Device::Type::GPU:
                 {
-                    if (gpuType == GPUType::Nvidia)
-                    {
-                        return std::stoi(nvidiasmiQuery("utilization.gpu"));
-                    }
-
-                    return 0;
+                    return nvidiaValue(device, "utilization.gpu", 1, precision);
                 }
             case Device::Type::RAM:
                 {
@@ -486,23 +588,17 @@ namespace sensors
                     static int totalRam = getRam("MemTotal:");
                     int freeRam = getRam("MemAvailable:");
 
+                    if (totalRam == error::code || freeRam == error::code)
+                    {
+                        return error::code;
+                    }
                     auto precisionFactor = 0.000001F;
                     precisionFactor *= std::pow(10, precision);
                     return (totalRam - freeRam) * precisionFactor;
                 }
             case Device::Type::VRAM:
                 {
-                    if (gpuType == GPUType::Nvidia)
-                    {
-                        auto memUsedStr = nvidiasmiQuery("memory.used");
-                        auto memUsedMiB = std::stoi(memUsedStr.substr(0, std::size(memUsedStr) - 4));
-                        auto memUsedGB = memUsedMiB * 0.001048576;
-
-                        int precisionFactor = std::pow(10, precision);
-                        return memUsedGB * precisionFactor;
-                    }
-
-                    return error::code;
+                    return nvidiaValue(device, "memory.used", 1e9 / (1024 * 1024), precision);
                 }
             case Device::Type::Any:
                 llog::Print(llog::pt::error, "Getting load from invalid device type with name:", device.name);
@@ -513,6 +609,14 @@ namespace sensors
 
     int getTemp(const Device& device, int precision)
     {
+        if (precision < 0 || precision > 6)
+        {
+            return error::code;
+        }
+        if (auto found = amdPaths.find(device.name); found != amdPaths.end())
+        {
+            return AMDtemp(found->second, device.type == Device::Type::VRAM, precision);
+        }
         switch (device.type)
         {
             case Device::Type::CPU:
@@ -531,17 +635,8 @@ namespace sensors
                         return error::code;
                     }
 
-                    tempFile.seekg(0);
-                    int temp = 0;
-                    tempFile >> temp;
-
-                    int precisionFactor = 1000;
-                    for (int i = 0; i < precision; i++)
-                    {
-                        precisionFactor /= 10;
-                    }
-
-                    return temp / precisionFactor;
+                    double temp;
+                    return tempFile >> temp ? scaledValue(temp / 1000.0, precision) : error::code;
                 }
             case Device::Type::CPUThread:
                 {
@@ -549,15 +644,7 @@ namespace sensors
                 }
             case Device::Type::GPU:
                 {
-                    if (gpuType == GPUType::Nvidia)
-                    {
-                        if (auto temp = nvidiasmiQuery("temperature.gpu"); temp != "N/A")
-                        {
-                            return std::stoi(temp);
-                        }
-                    }
-
-                    break;
+                    return nvidiaValue(device, "temperature.gpu", 1, precision);
                 }
             case Device::Type::RAM:
                 {
@@ -565,17 +652,7 @@ namespace sensors
                 }
             case Device::Type::VRAM:
                 {
-                    if (gpuType == GPUType::Nvidia)
-                    {
-                        if (auto memTemp = nvidiasmiQuery("temperature.memory"); memTemp != "N/A")
-                        {
-                            return std::stoi(memTemp);
-                        }
-
-                        return error::code;
-                    }
-
-                    return error::code;
+                    return nvidiaValue(device, "temperature.memory", 1, precision);
                 }
             case Device::Type::Any:
                 llog::Print(llog::pt::error, "Getting temperature from invalid device type with name:", device.name);
